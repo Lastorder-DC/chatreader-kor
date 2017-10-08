@@ -6,154 +6,153 @@
 	<script src="https://cdn.rawgit.com/Skhmt/tapic/5.0.2/dist/tapic.min.js"></script>
 </head>
 <body>
-<div id="chat" style="overflow: hidden; word-wrap: break-word; height: 800px; width: 800px;">
-	<button type="button" class="btn btn-danger" onclick="speechSynthesis.cancel()">큐 비우기</button>
-	<!-- <button type="button" class="btn btn-warning" id="pausebtn">일시중지</button> -->
-</div>
-<script>
-	var oauth = 'usexgv9w2ikqi1lpx8x94q1dqhh3d9';
-	var url_string = window.location.href;
-	var url = new URL(url_string);
-	
-	//주소뒤 ?channel=(채널아이디) 로 지정
-	window.channelname = url.searchParams.get("channel");
-    
-    //읽을 채팅 최대 길이(!!tts maxlength (길이)로 변경가능)
-    window.maxlength = localStorage.getItem("tts_maxlength") !== null ? parseInt(localStorage.getItem("tts_maxlength")) : 40;
-    
-    //밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
-    window.banlist = localStorage.getItem("tts_banlist") !== null ? localStorage.getItem("tts_banlist").split("|") : [];
-    
-    //초기화 성공 여부
-    window.initok = false;
+	<div id="chat" style="overflow: hidden; word-wrap: break-word; height: 800px; width: 800px;">
+		<button type="button" class="btn btn-danger" onclick="speechSynthesis.cancel()">큐 비우기</button>
+		<!-- <button type="button" class="btn btn-warning" id="pausebtn">일시중지</button> -->
+	</div>
+	<script>
+		var oauth = 'usexgv9w2ikqi1lpx8x94q1dqhh3d9';
+		var url_string = window.location.href;
+		var url = new URL(url_string);
 
-	// You have to run .setup() before anything besides .listen()
-	TAPIC.setup(oauth, function (username) {
+		//주소뒤 ?channel=(채널아이디) 로 지정
+		window.channelname = url.searchParams.get("channel");
 
-		// By default, TAPIC refreshes API information every 5 seconds, which is the minimum.
-		// Setting the refresh rate is optional.
-		TAPIC.setRefreshRate(10); 
+		//읽을 채팅 최대 길이(!!tts maxlength (길이)로 변경가능)
+		window.maxlength = localStorage.getItem("tts_maxlength") !== null ? parseInt(localStorage.getItem("tts_maxlength")) : 40;
 
-		// This is also required for a lot of things to work
-		TAPIC.joinChannel(window.channelname, function () {
-            if('speechSynthesis' in window) {
-                window.korSupport = false;
-                
-                var msg = new SpeechSynthesisUtterance("a");
-                msg.volume = 0;
-                speechSynthesis.cancel();
-                
-                msg.onend = function (event) {
-					var voices = speechSynthesis.getVoices();
-					
-					if(voices.length == 0) {
-						alert("사용 가능한 TTS DB 없음");
-					} else {
-						speechSynthesis.getVoices().forEach(function(voice) {
-							if(voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
-						});
+		//밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
+		window.banlist = localStorage.getItem("tts_banlist") !== null ? localStorage.getItem("tts_banlist").split("|") : [];
 
-						if(!window.korSupport) {
-							alert("한글 미지원으로 사용 불가능");
+		//초기화 성공 여부
+		window.initok = false;
+
+		// You have to run .setup() before anything besides .listen()
+		TAPIC.setup(oauth, function(username) {
+
+			// By default, TAPIC refreshes API information every 5 seconds, which is the minimum.
+			// Setting the refresh rate is optional.
+			TAPIC.setRefreshRate(10);
+
+			// This is also required for a lot of things to work
+			TAPIC.joinChannel(window.channelname, function() {
+				if ('speechSynthesis' in window) {
+					window.korSupport = false;
+
+					var msg = new SpeechSynthesisUtterance("a");
+					msg.volume = 0;
+					speechSynthesis.cancel();
+
+					msg.onend = function(event) {
+						var voices = speechSynthesis.getVoices();
+
+						if (voices.length == 0) {
+							alert("사용 가능한 TTS DB 없음");
+						} else {
+							speechSynthesis.getVoices().forEach(function(voice) {
+								if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
+							});
+
+							if (!window.korSupport) {
+								alert("한글 미지원으로 사용 불가능");
+							}
+
+							var msg2 = new SpeechSynthesisUtterance(window.channelname + "채널에 연결되었습니다.");
+							speechSynthesis.cancel();
+							msg2.onend = function(event) {
+								window.initok = true;
+							}
+
+							window.speechSynthesis.speak(msg2);
 						}
+					};
 
-						var msg2 = new SpeechSynthesisUtterance(window.channelname + "채널에 연결되었습니다.");
-						speechSynthesis.cancel();
-						msg2.onend = function (event) {
-							window.initok = true;
+					window.speechSynthesis.speak(msg);
+				} else {
+					alert("TTS API 미지원으로 사용 불가능");
+				}
+			});
+		});
+
+		TAPIC.listen('message', function(e) {
+			if ((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && e.text.match(/!!tts /) !== null) {
+				var command = e.text.replace("!!tts ", "");
+				if (command !== "") {
+					if (command.indexOf("maxlength ") !== -1) {
+						command = command.replace("maxlength ", "");
+						if (parseInt(command) > 0) {
+							window.maxlength = parseInt(command);
+							localStorage.setItem("tts_maxlength", command);
 						}
-						
-						window.speechSynthesis.speak(msg2);
 					}
-                };
-				
-				window.speechSynthesis.speak(msg);
-            } else {
-                alert("TTS API 미지원으로 사용 불가능");
-            }
-    	});
-	});
-    
-    TAPIC.listen('message', function (e) {
-        if((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && e.text.match(/!!tts /) !== null) {
-            var command = e.text.replace("!!tts ","");
-            if(command !== "") {
-                if(command.indexOf("maxlength ") !== -1) {
-                    command = command.replace("maxlength ","");
-                    if(parseInt(command) > 0) {
-                        window.maxlength = parseInt(command);
-						localStorage.setItem("tts_maxlength",command);
-                    }
-                }
-				
-				if(command.indexOf("unban ") !== -1) {
-                    command = command.replace("unban ","");
-                    if(command != "") {
-                        var index = window.banlist.indexOf(command);
-                        if (index !== -1) {
-                            window.banlist.splice(index, 1);
-							localStorage.setItem("tts_banlist",window.banlist.join("|"));
-                        }
-                    }
-                } else {
-					if(command.indexOf("ban ") !== -1) {
-						command = command.replace("ban ","");
-						if(command != "") {
+
+					if (command.indexOf("unban ") !== -1) {
+						command = command.replace("unban ", "");
+						if (command != "") {
 							var index = window.banlist.indexOf(command);
-							if (index === -1) {
-								window.banlist.push(command);
-								localStorage.setItem("tts_banlist",window.banlist.join("|"));
+							if (index !== -1) {
+								window.banlist.splice(index, 1);
+								localStorage.setItem("tts_banlist", window.banlist.join("|"));
+							}
+						}
+					} else {
+						if (command.indexOf("ban ") !== -1) {
+							command = command.replace("ban ", "");
+							if (command != "") {
+								var index = window.banlist.indexOf(command);
+								if (index === -1) {
+									window.banlist.push(command);
+									localStorage.setItem("tts_banlist", window.banlist.join("|"));
+								}
 							}
 						}
 					}
 				}
-            }
-        } else {
-            if(window.initok) {
-                var index = window.banlist.indexOf(e.from);
-				var message = e.text;
-				message = message.replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g,"링크");
-				message = message.replace(/\?{2,}/g,"?");
-				message = message.replace(/ㅋ{3,}/g,"ㅋㅋㅋ");
-				message = message.replace(/SSSsss/g,"");
-				message = message.replace(/^!.*/g,"");
-				
-				if(message != "") {
-					if(e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) {
-						playText(message);
-					} else {
-						// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
-						if (index === -1 && message.length < window.maxlength) {
+			} else {
+				if (window.initok) {
+					var index = window.banlist.indexOf(e.from);
+					var message = e.text;
+					message = message.replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g, "링크");
+					message = message.replace(/\?{2,}/g, "?");
+					message = message.replace(/ㅋ{3,}/g, "ㅋㅋㅋ");
+					message = message.replace(/SSSsss/g, "");
+					message = message.replace(/^!.*/g, "");
+
+					if (message != "") {
+						if (e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) {
 							playText(message);
+						} else {
+							// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
+							if (index === -1 && message.length < window.maxlength) {
+								playText(message);
+							}
 						}
 					}
 				}
-            }
-        }
-	});
-    
-	function playText(string) {
-		if('speechSynthesis' in window) {
-			var i = 0;
-			var google_kor = -1;
+			}
+		});
 
-			speechSynthesis.getVoices().forEach(function(voice) {
-				if(voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
-				if(voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
-					google_kor = i;
+		function playText(string) {
+			if ('speechSynthesis' in window) {
+				var i = 0;
+				var google_kor = -1;
+
+				speechSynthesis.getVoices().forEach(function(voice) {
+					if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
+					if (voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
+						google_kor = i;
+					}
+					i++;
+				});
+
+				if (window.korSupport) {
+					var msg = new SpeechSynthesisUtterance(string);
+
+					if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
+					window.speechSynthesis.speak(msg);
 				}
-				i++;
-			});
-
-			if(window.korSupport) {
-				var msg = new SpeechSynthesisUtterance(string);
-
-				if(google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
-				window.speechSynthesis.speak(msg);
 			}
 		}
-	}
-</script>
-
+	</script>
 </body>
 </html>
