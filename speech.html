@@ -8,7 +8,8 @@
 </head>
 <body>
 	<div id="chat" style="overflow: hidden; word-wrap: break-word; height: 800px; width: 800px;">
-		<button type="button" class="btn btn-danger" disabled="disabled" id="btn-cancel" onclick="window.speechSynthesis.cancel();playText('큐를 비웠습니다',1.3)">초기화중</button>
+		<button type="button" class="btn btn-danger" disabled="disabled" id="btn-cancel" onclick="window.speechSynthesis.cancel();playText('큐를 비웠습니다',1.3,false,'SYSTEM')">초기화중</button><br />
+		<div id="last_read"></div>
 		<!-- <button type="button" class="btn btn-warning" id="pausebtn">일시중지</button> -->
 	</div>
 	<script>
@@ -28,10 +29,15 @@
 		window.maxlength = localStorage.getItem("tts_maxlength") !== null ? parseInt(localStorage.getItem("tts_maxlength")) : 40;
 
 		//밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
-		window.banlist = localStorage.getItem("tts_banlist") !== null ? localStorage.getItem("tts_banlist").split("|") : [];
+		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist").split("|") : [];
 
 		//초기화 성공 여부
 		window.initok = false;
+		
+		window.mod_speed = 1;
+		window.nonmod_speed = 1.2;
+		
+		speechSynthesis.cancel();
 
 		// You have to run .setup() before anything besides .listen()
 		TAPIC.setup(oauth, function(username) {
@@ -90,7 +96,7 @@
 							window.maxlength = parseInt(command);
 							if(window.maxlength > 120) window.maxlength = 120;
 							localStorage.setItem("tts_maxlength", window.maxlength.toString());
-							playText("최대 TTS 글자수가 " + window.maxlength.toString() + "글자로 바뀌었습니다.", 1.3, false);
+							playText("최대 TTS 글자수가 " + window.maxlength.toString() + "글자로 바뀌었습니다.", 1.3, false, "SYSTEM");
 						}
 					}
 
@@ -112,10 +118,10 @@
 							var index = window.banlist.indexOf(command);
 							if (index !== -1) {
 								window.banlist.splice(index, 1);
-								localStorage.setItem("tts_banlist", window.banlist.join("|"));
-								playText("시청자." + command + ". 를 차단 해제했습니다.", 1.3, false);
+								localStorage.setItem("tts_banlist_" + window.channelname, window.banlist.join("|"));
+								playText("시청자." + command + ". 를 차단 해제했습니다.", 1.3, false, "SYSTEM");
 							} else {
-								playText("시청자." + command + ". 는 차단되어 있지 않습니다.", 1.3, false);
+								playText("시청자." + command + ". 는 차단되어 있지 않습니다.", 1.3, false, "SYSTEM");
 							}
 						}
 					} else {
@@ -125,10 +131,10 @@
 								var index = window.banlist.indexOf(command);
 								if (index === -1) {
 									window.banlist.push(command);
-									localStorage.setItem("tts_banlist", window.banlist.join("|"));
-									playText("시청자." + command + ". 를 차단했습니다.", 1.3, false);
+									localStorage.setItem("tts_banlist_" + window.channelname, window.banlist.join("|"));
+									playText("시청자." + command + ". 를 차단했습니다.", 1.3, false, "SYSTEM");
 								} else {
-									playText("시청자." + command + ". 은 이미 차단되어 있습니다.", 1.3, false);
+									playText("시청자." + command + ". 은 이미 차단되어 있습니다.", 1.3, false, "SYSTEM");
 								}
 							}
 						}
@@ -170,11 +176,11 @@
 					if (message != "") {
 						// 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
 						if ((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && message.length < 120) {
-							playText(message, 1, false);
+							playText(message, window.mod_speed, false, e.from);
 						} else {
 							// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
 							if (index === -1 && message.length < window.maxlength) {
-								playText(message, 1.2, false);
+								playText(message, window.nonmod_speed, false, e.from);
 							}
 						}
 					}
@@ -182,7 +188,7 @@
 			}
 		});
 
-		function playText(string, speed, ignoreKor) {
+		function playText(string, speed, ignoreKor, nickname) {
 			if ('speechSynthesis' in window) {
 				var i = 0;
 				var google_kor = -1;
@@ -208,8 +214,13 @@
 					
 					if(check.test(string)) msg.lang = "ko-KR";
 					else msg.lang = "en-US";
+					msg.from = nickname;
 					if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
 					msg.rate = speed;
+					msg.onstart = function(event) {
+						if(typeof event.utterance.from == "undefined" || event.utterance.from == "") event.utterance.from = "Unknown";
+						document.getElementById("last_read").innerHTML = "<b>" + event.utterance.from + "</b>:" + event.utterance.text;
+					}
 					msg.onend = function(event) {
 						if (window.debugmode) console.log("msg read event");
 						if (window.debugmode) console.log(event);
