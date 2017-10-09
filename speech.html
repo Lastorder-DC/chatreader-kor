@@ -29,7 +29,7 @@
 		window.maxlength = localStorage.getItem("tts_maxlength") !== null ? parseInt(localStorage.getItem("tts_maxlength")) : 40;
 
 		//밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
-		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist").split("|") : [];
+		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? String(localStorage.getItem("tts_banlist")).split("|") : [];
 
 		//초기화 성공 여부
 		window.initok = false;
