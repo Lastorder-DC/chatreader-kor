@@ -186,18 +186,28 @@
 			if ('speechSynthesis' in window) {
 				var i = 0;
 				var google_kor = -1;
+				var check = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
 
 				speechSynthesis.getVoices().forEach(function(voice) {
-					if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
-					if (voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
-						google_kor = i;
+					if(check.test(string)) {
+						if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
+						if (voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
+							google_kor = i;
+						}
+					} else {
+						if (voice.lang == "en-US" && voice.name.indexOf("Google") !== -1) {
+							google_kor = i;
+						}
 					}
+					
 					i++;
 				});
 
 				if (window.korSupport || ignoreKor) {
 					var msg = new SpeechSynthesisUtterance(string);
-
+					
+					if(check.test(string)) msg.lang = "ko-KR";
+					else msg.lang = "en-US";
 					if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
 					msg.rate = speed;
 					msg.onend = function(event) {
