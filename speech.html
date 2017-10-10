@@ -30,6 +30,9 @@
 
 		//밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
 		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? String(localStorage.getItem("tts_banlist")).split("|") : [];
+		
+		// 기본적으로 밴할 리스트
+		window.banlist = window.banlist.concat(['Nightbot']);
 
 		//초기화 성공 여부
 		window.initok = false;
@@ -175,7 +178,7 @@
 
 					if (message != "") {
 						// 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
-						if ((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && message.length < 120) {
+						if (((e.mod && index < 0) || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && message.length < 120) {
 							playText(message, window.mod_speed, false, e.from);
 						} else {
 							// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
