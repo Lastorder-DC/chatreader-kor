@@ -192,13 +192,20 @@
 				if ('speechSynthesis' in window) {
 					var i = 0;
 					var google_kor = -1;
+					var google_jpn = -1;
 					var check = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+					var check_jp = /[\u3040-\u30ff\u31f0-\u31ff]/;
 
 					speechSynthesis.getVoices().forEach(function(voice) {
 						if(check.test(string)) {
 							if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
 							if (voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
 								google_kor = i;
+							}
+						} else if(check_jp.test(string)) {
+							if(voice.lang == "ja_JP" || voice.lang == "ja-JP" || voice.lang == "jp" || voice.lang == "ja") window.jpnSupport = true;
+							if(voice.lang == "ja-JP" && voice.name.indexOf("Google") !== -1) {
+								google_jpn = i;
 							}
 						} else {
 							if (voice.lang == "en-US" && voice.name.indexOf("Google") !== -1) {
@@ -213,6 +220,7 @@
 						var msg = new SpeechSynthesisUtterance(string);
 
 						if(check.test(string)) msg.lang = "ko-KR";
+						else if(check_jp.test(string)) msg.lang = 'ja-JP';
 						else msg.lang = "en-US";
 						msg.from = nickname;
 						if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
