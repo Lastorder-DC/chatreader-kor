@@ -35,8 +35,8 @@
 		//밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
 		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist_" + window.channelname).split("|") : [];
 		
-		// 기본적으로 밴할 리스트
-		window.banlist = window.banlist.concat(['Nightbot']);
+		//기본적으로 밴할 리스트
+		window.banlist = window.banlist.concat(["Nightbot"]);
 
 		//초기화 성공 여부
 		window.initok = false;
@@ -220,7 +220,7 @@
 						var msg = new SpeechSynthesisUtterance(string);
 
 						if(check.test(string)) msg.lang = "ko-KR";
-						else if(check_jp.test(string)) msg.lang = 'ja-JP';
+						else if(check_jp.test(string)) msg.lang = "ja-JP";
 						else msg.lang = "en-US";
 						msg.from = nickname;
 						if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
