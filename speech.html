@@ -173,6 +173,9 @@
 						// !로 시작하는 메세지는 읽지 않음
 						message = message.replace(/^!.*/g, "");
 
+						// /me 명령어 입력시 나타나는 맨 마지막 \x01 제거
+						if(message.charCodeAt(message.length-1) === 1) message = message.substr(0, message.length - 1);
+
 						if (message != "") {
 							// 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
 							if (((e.mod && index < 0) || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && message.length < 120) {
