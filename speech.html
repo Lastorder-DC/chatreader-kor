@@ -17,6 +17,14 @@
 		<div id="last_read"></div>
 	</div>
 	<script>
+		// 트위치 개발자 사이트에서 앱 등록으로 client id를 발급받으실수 있습니다.
+		window.oauth_client_id = "l1m3093ma90v02ht6wjbjy4lpz3hzr";
+
+		// 인증후 돌아올 페이지(현재 페이지 주소)를 입력합니다.
+		window.oauth_redirect_uri = "http://chat.lastorder.xyz/speech.html";
+		// ==================================
+		// !! 이 아래로는 수정하지 마세요! !!
+		// ==================================
 		/**
 		 * 정규식 특수문자 이스케이프 함수
 		 * @param {String} str
@@ -82,19 +90,19 @@
 		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist_" + window.channelname).split("|") : [];
 
 		// 기본적으로 밴할 리스트
-		window.banlist = window.banlist.concat(['Nightbot','싹둑']);
+		window.banlist = window.banlist.concat(['Nightbot', '싹둑']);
 
 		//초기화 성공 여부
 		window.initok = false;
 
 		window.mod_speed = 1;
 		window.nonmod_speed = 1.2;
-		
+
 		alertify.defaults.transition = "slide";
 		alertify.defaults.theme.ok = "btn btn-primary";
 		alertify.defaults.theme.cancel = "btn btn-danger";
 		alertify.defaults.theme.input = "form-control";
-		alertify.set('notifier','position', 'top-center');
+		alertify.set('notifier', 'position', 'top-center');
 
 		speechSynthesis.cancel();
 
@@ -105,9 +113,8 @@
 
 				if (window.channelname == "") {
 					document.body.innerHTML = '';
-					alertify.prompt('채널 아이디 입력', '연결할 채널 아이디를 입력해주세요. 한글 닉네임 대신 twitch.tv/ 주소 뒤에 붙는 영문 아이디를 입력해주셔야 합니다.', ''
-					, function(evt, value) {
-						if(value == "") {
+					alertify.prompt('채널 아이디 입력', '연결할 채널 아이디를 입력해주세요. 한글 닉네임 대신 twitch.tv/ 주소 뒤에 붙는 영문 아이디를 입력해주셔야 합니다.', '', function(evt, value) {
+						if (value == "") {
 							alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
 						} else {
 							window.channelname = value;
@@ -115,8 +122,10 @@
 						}
 					}, function() {
 						alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
-					}).set({'closableByDimmer': false});
-					
+					}).set({
+						'closableByDimmer': false
+					});
+
 					//document.write("채널 아이디가 비어 있습니다. 주소 끝에 ?channel=channelid 처럼 채널 아이디를 지정해 주셔야 합니다.");
 				} else {
 					TAPIC.joinChannel(window.channelname, function() {
@@ -255,12 +264,12 @@
 
 						// !로 시작하는 메세지는 읽지 않음
 						message = message.replace(/^!.*/g, "");
-						
+
 						// /me 명령어 입력시 나타나는 맨 마지막 \x01 제거
-						if(message.charCodeAt(message.length-1) === 1) message = message.substr(0, message.length - 1);
-						
+						if (message.charCodeAt(message.length - 1) === 1) message = message.substr(0, message.length - 1);
+
 						// 트위치 이모티콘은 읽지 않음
-						message = replaceTwitchEmoticon(message,e.emotes);
+						message = replaceTwitchEmoticon(message, e.emotes);
 
 						if (message != "") {
 							// 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
@@ -291,9 +300,9 @@
 							if (voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
 								google_kor = i;
 							}
-						} else if(check_jp.test(string)) {
-							if(voice.lang == "ja_JP" || voice.lang == "ja-JP" || voice.lang == "jp" || voice.lang == "ja") window.jpnSupport = true;
-							if(voice.lang == "ja-JP" && voice.name.indexOf("Google") !== -1) {
+						} else if (check_jp.test(string)) {
+							if (voice.lang == "ja_JP" || voice.lang == "ja-JP" || voice.lang == "jp" || voice.lang == "ja") window.jpnSupport = true;
+							if (voice.lang == "ja-JP" && voice.name.indexOf("Google") !== -1) {
 								google_jpn = i;
 							}
 						} else {
@@ -309,7 +318,7 @@
 						var msg = new SpeechSynthesisUtterance(string);
 
 						if (check.test(string)) msg.lang = "ko-KR";
-						else if(check_jp.test(string)) msg.lang = "ja-JP";
+						else if (check_jp.test(string)) msg.lang = "ja-JP";
 						else msg.lang = "en-US";
 						msg.from = nickname;
 						if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
@@ -361,7 +370,13 @@
 				localStorage.setItem("last_url", location.href);
 
 				document.body.innerHTML = '';
-				document.write("트위치로 로그인해야 사용하실수 있습니다. <a href=\"https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=l1m3093ma90v02ht6wjbjy4lpz3hzr&redirect_uri=http://chat.lastorder.xyz/speech.html&scope=chat_login%20channel_editor%20channel_commercial%20channel_check_subscription&state=" + state + "\">로그인</a>");
+				document.write("트위치로 로그인해야 사용하실수 있습니다. <a href=\"https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=" +
+					window.oauth_client_id +
+					"&redirect_uri=" +
+					window.oauth_redirect_uri +
+					"&scope=chat_login%20channel_editor%20channel_commercial%20channel_check_subscription&state=" +
+					state +
+					"\">로그인</a>");
 			}
 		}
 	</script>
