@@ -3,18 +3,64 @@
 <head>
 	<title>채팅 읽어주는 로봇</title>
 	<meta charset="utf-8">
-	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css">
 	<script src="https://cdn.rawgit.com/Skhmt/tapic/5.0.2/dist/tapic.min.js"></script>
 	<script src="https://cdn.rawgit.com/blueimp/JavaScript-MD5/v2.10.0/js/md5.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/alertify.min.js"></script>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/css/alertify.min.css" />
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/css/themes/bootstrap.min.css" />
 </head>
 <body>
 	<div id="chat" style="overflow: hidden; word-wrap: break-word; height: 800px; width: 800px;">
 		<button type="button" class="btn btn-danger" disabled="disabled" id="btn-cancel" onclick="window.speechSynthesis.cancel();playText('큐를 비웠습니다',1.3,false,'SYSTEM')">초기화중</button>
 		<button type="button" class="btn btn-warning" onclick="localStorage.setItem('oauth','');location.reload();" id="btn-logout" disabled="disabled">로그아웃</button><br />
 		<div id="last_read"></div>
-		<!--  -->
 	</div>
 	<script>
+		/**
+		 * 정규식 특수문자 이스케이프 함수
+		 * @param {String} str
+		 * @returns {String}
+		 */
+		function escapeRegExp(str) {
+			return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+		}
+
+		/**
+		 * 트위치 이모티콘을 공백으로 치환
+		 * @param {String} str
+		 * @returns {String} message without twitch emoticon
+		 */
+		function replaceTwitchEmoticon(message, emotes) {
+			var ranges;
+			var id;
+			var emote_id;
+			var regExp;
+			var replace_list = {};
+
+			if (typeof emotes != 'undefined') {
+				var emote_list = emotes.split("/");
+				emote_list.forEach(function(emote_replace) {
+					ranges = emote_replace.split(":");
+					id = ranges[0];
+					if (typeof ranges[1] == 'undefined') return;
+					ranges = ranges[1].split(",");
+					if (typeof ranges[0] != 'undefined') {
+						ranges = ranges[0].split("-");
+						emote_id = message.substring(parseInt(ranges[0]), parseInt(ranges[1]) + 1);
+						replace_list[emote_id] = id;
+					}
+				});
+
+				for (var replace_id in replace_list) {
+					regExp = new RegExp(escapeRegExp(replace_id), "g");
+					message = message.replace(regExp, "");
+				}
+			}
+
+			return message;
+		}
+
 		var url_string = window.location.href;
 		var url = new URL(url_string);
 
@@ -22,7 +68,7 @@
 		window.channelname = url.searchParams.get("channel");
 
 		if (window.channelname === null) window.channelname = "";
-		
+
 		//oauth token으로 처음 페이지 접속시 트위치 로그인으로 생성함(로컬스토리지 저장, 로그아웃시 초기화됨)
 		window.oauth = localStorage.getItem("oauth") !== null ? localStorage.getItem("oauth") : "";
 
@@ -34,27 +80,43 @@
 
 		//밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
 		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist_" + window.channelname).split("|") : [];
-		
-		//기본적으로 밴할 리스트
-		window.banlist = window.banlist.concat(["Nightbot"]);
+
+		// 기본적으로 밴할 리스트
+		window.banlist = window.banlist.concat(['Nightbot','싹둑']);
 
 		//초기화 성공 여부
 		window.initok = false;
-		
+
 		window.mod_speed = 1;
 		window.nonmod_speed = 1.2;
 		
+		alertify.defaults.transition = "slide";
+		alertify.defaults.theme.ok = "btn btn-primary";
+		alertify.defaults.theme.cancel = "btn btn-danger";
+		alertify.defaults.theme.input = "form-control";
+		alertify.set('notifier','position', 'top-center');
+
 		speechSynthesis.cancel();
-		
-		if(window.oauth != "") {
+
+		if (window.oauth != "") {
 			// You have to run .setup() before anything besides .listen()
-			TAPIC.setup(oauth, function(username) {
+			TAPIC.setup(window.oauth, function(username) {
 				TAPIC.setRefreshRate(10);
 
 				if (window.channelname == "") {
 					document.body.innerHTML = '';
-					var channelid = prompt("연결할 채널 아이디를 입력해주세요. 한글 닉네임 대신 twitch.tv/ 주소 뒤에 붙는 영문 아이디를 입력해주셔야 합니다.");
-					location.href = url.origin + url.pathname + "?channel=" + channelid;
+					alertify.prompt('채널 아이디 입력', '연결할 채널 아이디를 입력해주세요. 한글 닉네임 대신 twitch.tv/ 주소 뒤에 붙는 영문 아이디를 입력해주셔야 합니다.', ''
+					, function(evt, value) {
+						if(value == "") {
+							alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
+						} else {
+							window.channelname = value;
+							location.href = url.origin + url.pathname + "?channel=" + value;
+						}
+					}, function() {
+						alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
+					}).set({'closableByDimmer': false});
+					
 					//document.write("채널 아이디가 비어 있습니다. 주소 끝에 ?channel=channelid 처럼 채널 아이디를 지정해 주셔야 합니다.");
 				} else {
 					TAPIC.joinChannel(window.channelname, function() {
@@ -95,7 +157,6 @@
 						}
 					});
 				}
-
 			});
 
 			TAPIC.listen('message', function(e) {
@@ -106,12 +167,12 @@
 							command = command.replace("maxlength ", "");
 							if (parseInt(command) > 0) {
 								window.maxlength = parseInt(command);
-								if(window.maxlength > 120) window.maxlength = 120;
+								if (window.maxlength > 120) window.maxlength = 120;
 								localStorage.setItem("tts_maxlength", window.maxlength.toString());
 								TAPIC.sendChat("/me [TTSBOT] 최대 TTS 글자수가 " + window.maxlength.toString() + "글자로 바뀌었습니다.");
 							}
 						}
-						
+
 						if (command.indexOf("unban ") !== -1) {
 							command = command.replace("unban ", "");
 							if (command != "") {
@@ -145,6 +206,28 @@
 					if (window.initok) {
 						var index = window.banlist.indexOf(e.from);
 						var message = e.text;
+
+						// Personality 적용
+						var personality_range1 = [1, 1.4];
+						var personality_range2 = [0.9, 1.2];
+
+						var personality_int1 = 0,
+							personality_int2 = 0;
+						for (var i = 0; i < e.from.length; i++) {
+							personality_int1 += e.from.charCodeAt(i);
+							personality_int2 |= e.from.charCodeAt(i);
+						}
+						personality_int1 %= ((personality_range1[1] * 10 - personality_range1[0] * 10) + 1);
+						personality_int2 %= ((personality_range2[1] * 10 - personality_range2[0] * 10) + 1);
+
+						var personality_speed = 1 + (personality_int1 / 10) - (1 - personality_range1[0]);
+						if (personality_speed < 0.8) personality_speed = window.nonmod_speed;
+						personality_speed = Math.min(personality_speed, personality_range1[1]);
+
+						var personality_pitch = 1 + (personality_int2 / 10) - (1 - personality_range2[0]);
+						if (personality_pitch < 0.8) personality_pitch = window.nonmod_speed;
+						personality_pitch = Math.min(personality_pitch, personality_range2[1]);
+
 						// 메세지 필터링
 						// 링크는 "링크"로 읽음
 						message = message.replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g, "링크");
@@ -152,8 +235,11 @@
 						// ? [ ] { } ( )는 읽지 않음
 						message = message.replace(/[\[\]\(\)\{\}]/g, "");
 
+						// &~~~;와 같은 엔티티 문자는 읽지 않음
+						message = message.replace(/&(.*);/g, "");
+
 						// 이모지는 읽지 않음
-						message = message.replace(/\ud83d[\ude00-\ude4f]/g,"");
+						message = message.replace(/\ud83d[\ude00-\ude4f]/g, "");
 
 						// ?는 한번만 읽음
 						message = message.replace(/\?{2,}/g, "?");
@@ -167,23 +253,23 @@
 						// 이외 모든 글자가 4번 이상 연속으로 있으면 삭제(읽지 않음)
 						message = message.replace(/(.)\1{3,}/g, "");
 
-						// 트위치 크리퍼 이모티콘 SSSsss는 읽지 않음
-						message = message.replace(/SSSsss/g, "");
-
 						// !로 시작하는 메세지는 읽지 않음
 						message = message.replace(/^!.*/g, "");
-
+						
 						// /me 명령어 입력시 나타나는 맨 마지막 \x01 제거
 						if(message.charCodeAt(message.length-1) === 1) message = message.substr(0, message.length - 1);
+						
+						// 트위치 이모티콘은 읽지 않음
+						message = replaceTwitchEmoticon(message,e.emotes);
 
 						if (message != "") {
 							// 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
 							if (((e.mod && index < 0) || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && message.length < 120) {
-								playText(message, window.mod_speed, false, e.from);
+								playText(message, personality_speed, personality_pitch, false, e.from);
 							} else {
 								// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
 								if (index === -1 && message.length < window.maxlength) {
-									playText(message, window.nonmod_speed, false, e.from);
+									playText(message, personality_speed, personality_pitch, false, e.from);
 								}
 							}
 						}
@@ -191,7 +277,7 @@
 				}
 			});
 
-			function playText(string, speed, ignoreKor, nickname) {
+			function playText(string, speed, pitch, ignoreKor, nickname) {
 				if ('speechSynthesis' in window) {
 					var i = 0;
 					var google_kor = -1;
@@ -200,7 +286,7 @@
 					var check_jp = /[\u3040-\u30ff\u31f0-\u31ff]/;
 
 					speechSynthesis.getVoices().forEach(function(voice) {
-						if(check.test(string)) {
+						if (check.test(string)) {
 							if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
 							if (voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
 								google_kor = i;
@@ -222,14 +308,16 @@
 					if (window.korSupport || ignoreKor) {
 						var msg = new SpeechSynthesisUtterance(string);
 
-						if(check.test(string)) msg.lang = "ko-KR";
+						if (check.test(string)) msg.lang = "ko-KR";
 						else if(check_jp.test(string)) msg.lang = "ja-JP";
 						else msg.lang = "en-US";
 						msg.from = nickname;
 						if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
+						else if (google_jpn !== -1) msg.voice = speechSynthesis.getVoices()[google_jpn];
 						msg.rate = speed;
+						msg.pitch = pitch;
 						msg.onstart = function(event) {
-							if(typeof event.utterance.from == "undefined" || event.utterance.from == "") event.utterance.from = "Unknown";
+							if (typeof event.utterance.from == "undefined" || event.utterance.from == "") event.utterance.from = "Unknown";
 							document.getElementById("last_read").innerHTML = "<b>" + event.utterance.from + "</b>:" + event.utterance.text;
 						}
 						msg.onend = function(event) {
@@ -242,36 +330,36 @@
 			}
 		} else {
 			// there's no oauth key
-			if(document.location.hash != "" && document.location.hash.indexOf("access_token") !== -1) {
+			if (document.location.hash != "" && document.location.hash.indexOf("access_token") !== -1) {
 				//user already authed
-				var rawauth = document.location.href.replace("#","?");
+				var rawauth = document.location.href.replace("#", "?");
 				var authobj = new URL(rawauth);
 				var oauth = authobj.searchParams.get("access_token");
 				var state = authobj.searchParams.get("state");
 				var localstate = localStorage.getItem("state");
 				var last_url = localStorage.getItem("last_url");
 				var last_url_obj = new URL(last_url);
-				
+
 				document.body.innerHTML = '';
-				
-				if(last_url_obj.origin !== authobj.origin) {
+
+				if (last_url_obj.origin !== authobj.origin) {
 					document.write("SECURITY ERROR");
 				} else {
-					if(localstate === null || localstate === "" || state !== localstate) {
+					if (localstate === null || localstate === "" || state !== localstate) {
 						document.write("잘못된 state값이 전달되었습니다. 페이지를 새로고침 해보세요.<br />Invalid state. please refresh and retry.")
 					} else {
-						localStorage.setItem("oauth",oauth);
-						localStorage.setItem("state","");
-						localStorage.setItem("last_url","");
+						localStorage.setItem("oauth", oauth);
+						localStorage.setItem("state", "");
+						localStorage.setItem("last_url", "");
 						location.href = last_url;
 					}
 				}
 			} else {
 				//not authed yet
 				var state = md5(Date.now());
-				localStorage.setItem("state",state);
-				localStorage.setItem("last_url",location.href);
-				
+				localStorage.setItem("state", state);
+				localStorage.setItem("last_url", location.href);
+
 				document.body.innerHTML = '';
 				document.write("트위치로 로그인해야 사용하실수 있습니다. <a href=\"https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=l1m3093ma90v02ht6wjbjy4lpz3hzr&redirect_uri=http://chat.lastorder.xyz/speech.html&scope=chat_login%20channel_editor%20channel_commercial%20channel_check_subscription&state=" + state + "\">로그인</a>");
 			}
