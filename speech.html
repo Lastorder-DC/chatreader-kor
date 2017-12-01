@@ -245,7 +245,7 @@
 						message = message.replace(/[\[\]\(\)\{\}]/g, "");
 
 						// &~~~;와 같은 엔티티 문자는 읽지 않음
-						message = message.replace(/&(.*);/g, "");
+						message = message.replace(/&(.*?);/g, "");
 
 						// 이모지는 읽지 않음
 						message = message.replace(/\ud83d[\ude00-\ude4f]/g, "");
