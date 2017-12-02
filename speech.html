@@ -72,27 +72,30 @@
 		var url_string = window.location.href;
 		var url = new URL(url_string);
 
-		//주소뒤 ?channel=(채널아이디) 로 지정
+		// 주소뒤 ?channel=(채널아이디) 로 지정
 		window.channelname = url.searchParams.get("channel");
 
 		if (window.channelname === null) window.channelname = "";
 
-		//oauth token으로 처음 페이지 접속시 트위치 로그인으로 생성함(로컬스토리지 저장, 로그아웃시 초기화됨)
+		// oauth token으로 처음 페이지 접속시 트위치 로그인으로 생성함(로컬스토리지 저장, 로그아웃시 초기화됨)
 		window.oauth = localStorage.getItem("oauth") !== null ? localStorage.getItem("oauth") : "";
 
-		//주소뒤 ?debug=true 로 디버그모드 활성화
+		// 주소뒤 ?debug=true 로 디버그모드 활성화
 		window.debugmode = url.searchParams.get("debug") === "true" ? true : false;
 
-		//읽을 채팅 최대 길이(!!tts maxlength (길이)로 변경가능)
+		// 읽을 채팅 최대 길이(!!tts maxlength (길이)로 변경가능)
 		window.maxlength = localStorage.getItem("tts_maxlength") !== null ? parseInt(localStorage.getItem("tts_maxlength")) : 40;
 
-		//밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
+		// 밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
 		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist_" + window.channelname).split("|") : [];
+		
+		// 밴키워드(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
+		window.bankeyword = localStorage.getItem("tts_bankeyword_" + window.channelname) !== null ? localStorage.getItem("tts_bankeyword_" + window.channelname).split("|") : [];
 
 		// 기본적으로 밴할 리스트
 		window.banlist = window.banlist.concat(['Nightbot', '싹둑']);
 
-		//초기화 성공 여부
+		// 초기화 성공 여부
 		window.initok = false;
 
 		window.mod_speed = 1;
@@ -125,8 +128,6 @@
 					}).set({
 						'closableByDimmer': false
 					});
-
-					//document.write("채널 아이디가 비어 있습니다. 주소 끝에 ?channel=channelid 처럼 채널 아이디를 지정해 주셔야 합니다.");
 				} else {
 					TAPIC.joinChannel(window.channelname, function() {
 						if ('speechSynthesis' in window) {
@@ -209,12 +210,41 @@
 								}
 							}
 						}
+						
+						if (command.indexOf("del ") !== -1) {
+							command = command.replace("del ", "");
+							if (command != "") {
+								var index = window.bankeyword.indexOf(escapeRegExp(command));
+								if (index !== -1) {
+									window.bankeyword.splice(index, 1);
+									localStorage.setItem("tts_bankeyword_" + window.channelname, window.bankeyword.join("|"));
+									TAPIC.sendChat("/me [TTSBOT] 키워드 " + command + " 를 차단 해제했습니다.");
+								} else {
+									TAPIC.sendChat("/me [TTSBOT] 시청자 " + command + " 는 차단되어 있지 않습니다.");
+								}
+							}
+						} else {
+							if (command.indexOf("add ") !== -1) {
+								command = command.replace("add ", "");
+								if (command != "") {
+									var index = window.bankeyword.indexOf(escapeRegExp(command));
+									if (index === -1) {
+										window.bankeyword.push(escapeRegExp(command));
+										localStorage.setItem("tts_bankeyword_" + window.channelname, window.bankeyword.join("|"));
+										TAPIC.sendChat("/me [TTSBOT] 키워드 " + command + " 를 차단했습니다.");
+									} else {
+										TAPIC.sendChat("/me [TTSBOT] 키워드 " + command + " 은 이미 차단되어 있습니다.");
+									}
+								}
+							}
+						}
 					}
 				} else {
 					// 초기화 후에만 읽음
 					if (window.initok) {
 						var index = window.banlist.indexOf(e.from);
 						var message = e.text;
+						var keyword_test = new RegExp("(" + window.bankeyword.join("|") + ")", "g");
 
 						// Personality 적용
 						var personality_range1 = [1, 1.4];
@@ -222,6 +252,10 @@
 
 						var personality_int1 = 0,
 							personality_int2 = 0;
+						
+						// 금지단어 포함 메세지 전체 읽지 않음
+						if(keyword_test.test(message)) return;
+						
 						for (var i = 0; i < e.from.length; i++) {
 							personality_int1 += e.from.charCodeAt(i);
 							personality_int2 |= e.from.charCodeAt(i);
