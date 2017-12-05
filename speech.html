@@ -69,11 +69,38 @@
 			return message;
 		}
 
+		/**
+		 * 주소의 GET 인자를 가져오는 함수
+		 * @param {String} name 가져올 GET인자 이름
+		 * @param {String} address (OPTIONAL) GET인자를 추출할 주소
+		 * @returns {String} GET인자 값
+		 */
+		function getParams(name, address) {
+			var url = "";
+			var results = "";
+
+			if (typeof address === 'undefined') {
+				address = window.location.href;
+			}
+
+			url = new URL(address);
+			if (typeof url.searchParams === 'undefined') {
+				results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(address);
+				if (results == null) {
+					return null;
+				} else {
+					return decodeURI(results[1]) || 0;
+				}
+			} else {
+				return url.searchParams.get(name);
+			}
+		}
+
 		var url_string = window.location.href;
 		var url = new URL(url_string);
 
 		// 주소뒤 ?channel=(채널아이디) 로 지정
-		window.channelname = url.searchParams.get("channel");
+		window.channelname = getParams("channel");
 
 		if (window.channelname === null) window.channelname = "";
 
@@ -81,20 +108,20 @@
 		window.oauth = localStorage.getItem("oauth") !== null ? localStorage.getItem("oauth") : "";
 
 		// 주소뒤 ?debug=true 로 디버그모드 활성화
-		window.debugmode = url.searchParams.get("debug") === "true" ? true : false;
+		window.debugmode = getParams("debug") === "true" ? true : false;
 
 		// 읽을 채팅 최대 길이(!!tts maxlength (길이)로 변경가능)
 		window.maxlength = localStorage.getItem("tts_maxlength") !== null ? parseInt(localStorage.getItem("tts_maxlength")) : 40;
 
 		// 밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
 		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist_" + window.channelname).split("|") : [];
-		
+
 		// 밴키워드(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
 		window.bankeyword = localStorage.getItem("tts_bankeyword_" + window.channelname) !== null ? localStorage.getItem("tts_bankeyword_" + window.channelname).split("|") : [];
 
 		// 기본적으로 밴할 리스트
 		window.banlist = window.banlist.concat(['Nightbot', '싹둑']);
-		
+
 		// 기본적으로 밴할 키워드
 		window.bankeyword = window.bankeyword.concat(['섹스']);
 
@@ -213,7 +240,7 @@
 								}
 							}
 						}
-						
+
 						if (command.indexOf("del ") !== -1) {
 							command = command.replace("del ", "");
 							if (command != "") {
@@ -255,10 +282,10 @@
 
 						var personality_int1 = 0,
 							personality_int2 = 0;
-						
+
 						// 금지단어 포함 메세지 전체 읽지 않음
-						if(keyword_test.test(message)) return;
-						
+						if (keyword_test.test(message)) return;
+
 						for (var i = 0; i < e.from.length; i++) {
 							personality_int1 += e.from.charCodeAt(i);
 							personality_int2 |= e.from.charCodeAt(i);
@@ -380,8 +407,8 @@
 				//user already authed
 				var rawauth = document.location.href.replace("#", "?");
 				var authobj = new URL(rawauth);
-				var oauth = authobj.searchParams.get("access_token");
-				var state = authobj.searchParams.get("state");
+				var oauth = getParams("access_token", rawauth);
+				var state = getParams("state", rawauth);
 				var localstate = localStorage.getItem("state");
 				var last_url = localStorage.getItem("last_url");
 				var last_url_obj = new URL(last_url);
