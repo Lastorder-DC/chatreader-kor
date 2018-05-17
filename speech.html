@@ -176,8 +176,12 @@
 							speechSynthesis.cancel();
 							
 							msg.onerror = function(event) {
-								console.error('An error has occurred with the speech synthesis: ' + event.error);
-								console.debug(event);
+								if(speechSynthesis.getVoices().length === 0) {
+									document.getElementById("last_read").innerHTML = "사용 가능한 TTS 보이스가 없습니다.";
+								} else {
+									document.getElementById("last_read").innerHTML = "알 수 없는 오류가 발생했습니다. 브라우저 콘솔창을 참조하세요.";
+									
+								}
 							}
 
 							msg.onend = function(event) {
