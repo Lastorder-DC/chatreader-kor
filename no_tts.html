@@ -14,7 +14,7 @@
 	<div id="chat" style="overflow: hidden; word-wrap: break-word; height: 800px; width: 800px;">
 		<button type="button" class="btn btn-danger" disabled="disabled" id="btn-cancel" onclick="window.speechSynthesis.cancel();playText('큐를 비웠습니다',1.3,false,'SYSTEM')">초기화중</button>
 		<button type="button" class="btn btn-warning" onclick="localStorage.setItem('oauth','');location.reload();" id="btn-logout" disabled="disabled">로그아웃</button><br />
-		<div id="last_read"></div>
+		<div id="last_read">TTS API를 지원하지 않거나, 사용 가능한 TTS 보이스가 없습니다.</div>
 	</div>
 	<script>
   if('speechSynthesis' in window) {
@@ -23,6 +23,5 @@
     }
   }
   </script>
-  <p>TTS API를 지원하지 않거나, 사용 가능한 TTS 보이스가 없습니다.</p>
 </body>
 </html>
