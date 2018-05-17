@@ -216,6 +216,7 @@
 			});
 
 			TAPIC.listen('message', function(e) {
+				console.debug(e);
 				if ((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && e.text.match(/!!tts /) !== null) {
 					var command = e.text.replace("!!tts ", "");
 					if (command !== "") {
