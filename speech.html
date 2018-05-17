@@ -99,6 +99,14 @@
 
 		var url_string = window.location.href;
 		var url = new URL(url_string);
+		
+		if('speechSynthesis' in window) {
+			if(speechSynthesis.getVoices().length === 0) {
+				location.href = "./no_tts.html";
+			}
+		} else {
+			location.href = "./no_tts.html";
+		}
 
 		// 주소뒤 ?channel=(채널아이디) 로 지정
 		window.channelname = getParams("channel");
