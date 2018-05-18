@@ -134,6 +134,9 @@
 		
 		// 구독자 전용
 		window.tts_subonly = localStorage.getItem("tts_subonly") === "true" ? true : false;
+		
+		// 구독자 전용
+		window.uniq_voice = localStorage.getItem("uniq_voice") === "false" ? false : true;
 
 		// 초기화 성공 여부
 		window.initok = false;
@@ -237,6 +240,20 @@
 							}
 						}
 						
+						if (command.indexOf("uniq ") !== -1) {
+							command = command.replace("uniq ", "");
+							if (command == "on" || command == "true" || command == "enable") {
+								window.uniq_voice = true;
+								localStorage.setItem("uniq_voice", "true");
+								TAPIC.sendChat("/me [TTSBOT] TTS 보이스 개인화가 활성화되었습니다.");
+							}
+							if (command == "off" || command == "false" || command == "disable") {
+								window.uniq_voice = false;
+								localStorage.setItem("uniq_voice", "false");
+								TAPIC.sendChat("/me [TTSBOT] TTS 보이스 개인화가 활성화되었습니다.");
+							}
+						}
+						
 						if (command.indexOf("maxlength ") !== -1) {
 							command = command.replace("maxlength ", "");
 							if (parseInt(command) > 0) {
@@ -315,25 +332,30 @@
 						var personality_range2 = [0.9, 1.2];
 
 						var personality_int1 = 0,
-							personality_int2 = 0;
+						    personality_int2 = 0;
 
 						// 금지단어 포함 메세지 전체 읽지 않음
 						if (keyword_test.test(message)) return;
+						
+						if (window.uniq_voice) {
+							for (var i = 0; i < e.from.length; i++) {
+								personality_int1 += e.from.charCodeAt(i);
+								personality_int2 |= e.from.charCodeAt(i);
+							}
+							personality_int1 %= ((personality_range1[1] * 10 - personality_range1[0] * 10) + 1);
+							personality_int2 %= ((personality_range2[1] * 10 - personality_range2[0] * 10) + 1);
 
-						for (var i = 0; i < e.from.length; i++) {
-							personality_int1 += e.from.charCodeAt(i);
-							personality_int2 |= e.from.charCodeAt(i);
+							var personality_speed = 1 + (personality_int1 / 10) - (1 - personality_range1[0]);
+							if (personality_speed < 0.8) personality_speed = window.nonmod_speed;
+							personality_speed = Math.min(personality_speed, personality_range1[1]);
+
+							var personality_pitch = 1 + (personality_int2 / 10) - (1 - personality_range2[0]);
+							if (personality_pitch < 0.8) personality_pitch = window.nonmod_speed;
+							personality_pitch = Math.min(personality_pitch, personality_range2[1]);
+						} else {
+							personality_speed = 1;
+							personality_pitch = 1;
 						}
-						personality_int1 %= ((personality_range1[1] * 10 - personality_range1[0] * 10) + 1);
-						personality_int2 %= ((personality_range2[1] * 10 - personality_range2[0] * 10) + 1);
-
-						var personality_speed = 1 + (personality_int1 / 10) - (1 - personality_range1[0]);
-						if (personality_speed < 0.8) personality_speed = window.nonmod_speed;
-						personality_speed = Math.min(personality_speed, personality_range1[1]);
-
-						var personality_pitch = 1 + (personality_int2 / 10) - (1 - personality_range2[0]);
-						if (personality_pitch < 0.8) personality_pitch = window.nonmod_speed;
-						personality_pitch = Math.min(personality_pitch, personality_range2[1]);
 
 						// 메세지 필터링
 						// 링크는 "링크"로 읽음
