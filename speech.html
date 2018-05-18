@@ -131,6 +131,9 @@
 
 		// 기본적으로 밴할 키워드
 		window.bankeyword = window.bankeyword.concat(['섹스']);
+		
+		// 구독자 전용
+		window.tts_subonly = localStorage.getItem("tts_subonly") === "true" ? true : false;
 
 		// 초기화 성공 여부
 		window.initok = false;
@@ -220,6 +223,20 @@
 				if ((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && e.text.match(/!!tts /) !== null) {
 					var command = e.text.replace("!!tts ", "");
 					if (command !== "") {
+						if (command.indexOf("subonly ") !== -1) {
+							command = command.replace("subonly ", "");
+							if (command == "on" || command == "true" || command == "enable") {
+								window.tts_subonly = true;
+								localStorage.setItem("tts_subonly", "true");
+								TAPIC.sendChat("/me [TTSBOT] 구독자 전용 TTS 모드가 활성화되었습니다.");
+							}
+							if (command == "off" || command == "false" || command == "disable") {
+								window.tts_subonly = false;
+								localStorage.setItem("tts_subonly", "false");
+								TAPIC.sendChat("/me [TTSBOT] 구독자 전용 TTS 모드가 비활성화되었습니다.");
+							}
+						}
+						
 						if (command.indexOf("maxlength ") !== -1) {
 							command = command.replace("maxlength ", "");
 							if (parseInt(command) > 0) {
@@ -359,7 +376,11 @@
 							} else {
 								// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
 								if (index === -1 && message.length < window.maxlength) {
-									playText(message, personality_speed, personality_pitch, false, e.from);
+									if(window.tts_subonly) {
+										if(e.sub) playText(message, personality_speed, personality_pitch, false, e.from);
+									} else {
+										playText(message, personality_speed, personality_pitch, false, e.from);
+									}
 								}
 							}
 						}
