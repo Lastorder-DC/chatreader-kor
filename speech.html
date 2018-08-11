@@ -358,6 +358,9 @@
 						}
 
 						// 메세지 필터링
+						// 클립 링크는 "클립"으로 읽음
+						message = message.replace(/https:\/\/clips.twitch.tv\/[^\ ]./g, "클립");
+						
 						// 링크는 "링크"로 읽음
 						message = message.replace(/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{2,256}\.[a-z]{2,4}\b([-a-zA-Z0-9@:%_\+.~#?&//=]*)/g, "링크");
 
