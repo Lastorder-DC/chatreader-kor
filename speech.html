@@ -4,18 +4,37 @@
 	<title>채팅 읽어주는 로봇</title>
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css">
+	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
 	<script src="https://cdn.rawgit.com/Skhmt/tapic/5.0.2/dist/tapic.min.js"></script>
 	<script src="https://cdn.rawgit.com/blueimp/JavaScript-MD5/v2.10.0/js/md5.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/alertify.min.js"></script>
+	<script src="https://lastorder.xyz/ChattyKathy/ChattyKathy.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/css/alertify.min.css" />
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/css/themes/bootstrap.min.css" />
 </head>
 <body>
-	<div id="chat" style="overflow: hidden; word-wrap: break-word; height: 800px; width: 800px;">
+	<div id="chat" style="overflow: hidden; word-wrap: break-word; width: 800px;">
 		<button type="button" class="btn btn-danger" disabled="disabled" id="btn-cancel" onclick="window.speechSynthesis.cancel();playText('큐를 비웠습니다',1.3,false,'SYSTEM')">초기화중</button>
-		<button type="button" class="btn btn-warning" onclick="localStorage.setItem('oauth','');location.reload();" id="btn-logout" disabled="disabled">로그아웃</button><br />
-		<div id="last_read"></div>
+		<button type="button" class="btn btn-warning" onclick="localStorage.setItem('oauth','');location.reload();" id="btn-logout">로그아웃</button><br />
+		<div id="last_read">(없음)</div>
 	</div>
+	<form style="margin:10px">
+		<div class="form-group">
+			<label for="polly_access_id">아마존 액세스 아이디</label>
+			<input type="text" class="form-control" id="polly_access_id" placeholder="Amazon Access ID">
+		</div>
+		<div class="form-group">
+			<label for="polly_access_key">아마존 액세스 키</label>
+			<input type="text" class="form-control" id="polly_access_key" placeholder="Amazon Access Key">
+		</div>
+		<div class="form-group row">
+			<div class="offset-sm-2 col-sm-10">
+				<button type="button" class="btn btn-primary" onclick="localStorage.setItem('polly_access_id', document.getElementById('polly_access_id').value);localStorage.setItem('polly_access_key', document.getElementById('polly_access_key').value);location.reload()">
+					정보 저장
+				</button>
+			</div>
+		</div>
+	</form>
 	<script>
 		// 트위치 개발자 사이트에서 앱 등록으로 client id를 발급받으실수 있습니다.
 		window.oauth_client_id = "bz5whp3i3ihi98e6e1jx3jkxnksyk1";
@@ -151,6 +170,20 @@
 		alertify.set('notifier', 'position', 'top-center');
 
 		speechSynthesis.cancel();
+		
+		document.getElementById('polly_access_id').value = localStorage.getItem("polly_access_id");
+		document.getElementById('polly_access_key').value = localStorage.getItem("polly_access_key");
+		var awsCredentials = new AWS.Credentials(localStorage.getItem("polly_access_id"), localStorage.getItem("polly_access_key"));
+		var settings = {
+			awsCredentials: awsCredentials,
+			awsRegion: "us-west-2",
+			pollyVoiceId: "Seoyeon",
+			cacheSpeech: true
+		}
+		
+		window.kathy = ChattyKathy(settings);
+		window.users = [];
+		window.speechQueue = [];
 
 		if (window.oauth != "") {
 			// You have to run .setup() before anything besides .listen()
@@ -326,6 +359,7 @@
 						var index = window.banlist.indexOf(e.from);
 						var message = e.text;
 						var keyword_test = new RegExp("(" + window.bankeyword.join("|") + ")", "g");
+						var voicename = "default";
 
 						// Personality 적용
 						var personality_range1 = [1, 1.4];
@@ -384,7 +418,13 @@
 
 						// 이외 모든 글자가 4번 이상 연속으로 있으면 삭제(읽지 않음)
 						message = message.replace(/(.)\1{3,}/g, "");
-
+						
+						// !sy = polly
+						if(message.indexOf("!sy") === 0) {
+							voicename = "polly"
+							message = message.replace("!sy", "").trim();
+						}
+						
 						// !로 시작하는 메세지는 읽지 않음
 						message = message.replace(/^!.*/g, "");
 
@@ -393,18 +433,17 @@
 
 						// 트위치 이모티콘은 읽지 않음
 						message = replaceTwitchEmoticon(message, e.emotes);
-
 						if (message != "") {
 							// 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
 							if (((e.mod && index < 0) || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && message.length < 120) {
-								playText(message, personality_speed, personality_pitch, false, e.from);
+								playText(message, personality_speed, personality_pitch, false, e.from, voicename);
 							} else {
 								// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
 								if (index === -1 && message.length < window.maxlength) {
 									if(window.tts_subonly) {
-										if(e.sub) playText(message, personality_speed, personality_pitch, false, e.from);
+										if(e.sub) playText(message, personality_speed, personality_pitch, false, e.from, voicename);
 									} else {
-										playText(message, personality_speed, personality_pitch, false, e.from);
+										playText(message, personality_speed, personality_pitch, false, e.from, voicename);
 									}
 								}
 							}
@@ -413,55 +452,71 @@
 				}
 			});
 
-			function playText(string, speed, pitch, ignoreKor, nickname) {
+			function playText(string, speed, pitch, ignoreKor, nickname, voicename) {
 				if ('speechSynthesis' in window) {
 					var i = 0;
 					var google_kor = -1;
 					var google_jpn = -1;
 					var check = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
 					var check_jp = /[\u3040-\u30ff\u31f0-\u31ff]/;
-
-					speechSynthesis.getVoices().forEach(function(voice) {
-						if (check.test(string)) {
-							if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
-							if (voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
-								google_kor = i;
+					
+					if(typeof voicename === 'undefined') voicename = "default";
+					console.error(voicename);
+					
+					if(voicename == "default") {
+						speechSynthesis.getVoices().forEach(function(voice) {
+							if (check.test(string)) {
+								if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
+								if (voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
+									google_kor = i;
+								}
+							} else if (check_jp.test(string)) {
+								if (voice.lang == "ja_JP" || voice.lang == "ja-JP" || voice.lang == "jp" || voice.lang == "ja") window.jpnSupport = true;
+								if (voice.lang == "ja-JP" && voice.name.indexOf("Google") !== -1) {
+									google_jpn = i;
+								}
+							} else {
+								if (voice.lang == "en-US" && voice.name.indexOf("Google") !== -1) {
+									google_kor = i;
+								}
 							}
-						} else if (check_jp.test(string)) {
-							if (voice.lang == "ja_JP" || voice.lang == "ja-JP" || voice.lang == "jp" || voice.lang == "ja") window.jpnSupport = true;
-							if (voice.lang == "ja-JP" && voice.name.indexOf("Google") !== -1) {
-								google_jpn = i;
+
+							i++;
+						});
+
+						if (window.korSupport || ignoreKor) {
+							var msg = new SpeechSynthesisUtterance(string);
+
+							if (check.test(string)) msg.lang = "ko-KR";
+							else if (check_jp.test(string)) msg.lang = "ja-JP";
+							else msg.lang = "en-US";
+							msg.from = nickname;
+							if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
+							else if (google_jpn !== -1) msg.voice = speechSynthesis.getVoices()[google_jpn];
+							msg.rate = speed;
+							msg.pitch = pitch;
+							msg.onstart = function(event) {
+								if (typeof event.utterance.from == "undefined" || event.utterance.from == "") event.utterance.from = "Unknown";
+								document.getElementById("last_read").innerHTML = "<b>" + event.utterance.from + "</b>:" + event.utterance.text;
 							}
-						} else {
-							if (voice.lang == "en-US" && voice.name.indexOf("Google") !== -1) {
-								google_kor = i;
+							msg.onend = function(event) {
+								if (window.debugmode) console.log("msg read event");
+								if (window.debugmode) console.log(event);
 							}
+							//window.speechSynthesis.speak(msg);
+							var obj = {};
+							obj.type = "default"
+							obj.msg = msg;
+							window.speechQueue.push(obj);
 						}
-
-						i++;
-					});
-
-					if (window.korSupport || ignoreKor) {
-						var msg = new SpeechSynthesisUtterance(string);
-
-						if (check.test(string)) msg.lang = "ko-KR";
-						else if (check_jp.test(string)) msg.lang = "ja-JP";
-						else msg.lang = "en-US";
-						msg.from = nickname;
-						if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
-						else if (google_jpn !== -1) msg.voice = speechSynthesis.getVoices()[google_jpn];
-						msg.rate = speed;
-						msg.pitch = pitch;
-						msg.onstart = function(event) {
-							if (typeof event.utterance.from == "undefined" || event.utterance.from == "") event.utterance.from = "Unknown";
-							document.getElementById("last_read").innerHTML = "<b>" + event.utterance.from + "</b>:" + event.utterance.text;
-						}
-						msg.onend = function(event) {
-							if (window.debugmode) console.log("msg read event");
-							if (window.debugmode) console.log(event);
-						}
-						window.speechSynthesis.speak(msg);
+					} else if(voicename == "polly") {
+						var obj = {};
+						obj.type = "polly"
+						obj.msg = '<speak><prosody rate="' + parseInt(speed * 100) + '%" pitch="' + parseInt(pitch * 100 - 100) + '%">' + string + '</prosody></speak>';
+						window.speechQueue.push(obj);
 					}
+					
+					parseQueue();
 				}
 			}
 		} else {
@@ -505,6 +560,33 @@
 					state +
 					"\">로그인</a>");
 			}
+		}
+		
+		function parseQueue() {
+			var queue = window.speechQueue;
+			
+			if(window.speechSynthesis.speaking || window.kathy.IsSpeaking()) {
+				setTimeout(parseQueue,100);
+				return;
+			}
+			
+			var obj = queue.shift();
+			if(typeof obj === 'undefined') {
+				setTimeout(parseQueue,100);
+				return;
+			}
+			
+			if(obj.type === "default") {
+				console.warn("Default TTS - " + obj.msg.text);
+				window.speechSynthesis.speak(obj.msg);
+			} else if(obj.type === "polly") {
+				console.warn("Amazon Polly - " + obj.msg);
+				window.kathy.Speak(obj.msg);
+			} else {
+				console.error("ERROR - Type " + obj.type + " is not supported.");
+			}
+			
+			setTimeout(parseQueue,100);
 		}
 	</script>
 </body>
