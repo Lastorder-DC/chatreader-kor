@@ -120,7 +120,7 @@
 		var url = new URL(url_string);
 		
 		if('speechSynthesis' in window) {
-			console.info("TTS check done");
+			console.debug("TTS check done");
 		} else {
 			location.href = "./no_tts.html";
 		}
@@ -258,7 +258,6 @@
 			});
 
 			TAPIC.listen('message', function(e) {
-				console.debug(e);
 				if ((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && e.text.match(/!!tts /) !== null) {
 					var command = e.text.replace("!!tts ", "");
 					if (command !== "") {
@@ -487,7 +486,6 @@
 					var check_jp = /[\u3040-\u30ff\u31f0-\u31ff]/;
 					
 					if(typeof voicename === 'undefined') voicename = "default";
-					console.error(voicename);
 					
 					if(voicename == "default") {
 						speechSynthesis.getVoices().forEach(function(voice) {
@@ -618,13 +616,13 @@
 			}
 			
 			if(obj.type === "default") {
-				console.warn("Default TTS - " + obj.msg.text);
+				console.debug("Default TTS - " + obj.msg.text);
 				window.speechSynthesis.speak(obj.msg);
 			} else if(obj.type === "polly") {
-				console.warn("Amazon Polly - " + obj.msg);
+				console.debug("Amazon Polly - " + obj.msg);
 				window.kathy.Speak(obj.msg);
 			} else {
-				console.error("ERROR - Type " + obj.type + " is not supported.");
+				console.warn("ERROR - Type " + obj.type + " is not supported.");
 			}
 			
 			setTimeout(parseQueue,100);
