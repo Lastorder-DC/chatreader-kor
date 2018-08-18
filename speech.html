@@ -16,6 +16,7 @@
 	<div id="chat" style="overflow: hidden; word-wrap: break-word; width: 800px;">
 		<button type="button" class="btn btn-danger" disabled="disabled" id="btn-cancel" onclick="window.speechQueue = [];window.kathy.ShutUp();window.speechSynthesis.cancel();playText('큐를 비웠습니다',1.3,1,false,'SYSTEM')">초기화중</button>
 		<button type="button" class="btn btn-warning" onclick="localStorage.setItem('oauth','');location.reload();" id="btn-logout">로그아웃</button><br />
+		<button type="button" class="btn btn-success" onclick="window.change_channel();" id="btn-channel">채널 변경</button><br />
 		<div id="last_read">(없음)</div>
 	</div>
 	<form style="margin:10px">
@@ -187,6 +188,21 @@
 		window.kathy = ChattyKathy(settings);
 		window.users = [];
 		window.speechQueue = [];
+		
+		window.change_channel = function() {
+			alertify.prompt('채널 아이디 입력', '연결할 채널 아이디를 입력해주세요. 한글 닉네임 대신 twitch.tv/ 주소 뒤에 붙는 영문 아이디를 입력해주셔야 합니다.', '', function(evt, value) {
+				if (value == "") {
+					alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
+				} else {
+					window.channelname = value;
+					location.href = url.origin + url.pathname + "?channel=" + value;
+				}
+			}, function() {
+				alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
+			}).set({
+				'closableByDimmer': false
+			});
+		};
 
 		if (window.oauth != "") {
 			// You have to run .setup() before anything besides .listen()
@@ -194,19 +210,7 @@
 				TAPIC.setRefreshRate(10);
 
 				if (window.channelname == "") {
-					document.body.innerHTML = '';
-					alertify.prompt('채널 아이디 입력', '연결할 채널 아이디를 입력해주세요. 한글 닉네임 대신 twitch.tv/ 주소 뒤에 붙는 영문 아이디를 입력해주셔야 합니다.', '', function(evt, value) {
-						if (value == "") {
-							alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
-						} else {
-							window.channelname = value;
-							location.href = url.origin + url.pathname + "?channel=" + value;
-						}
-					}, function() {
-						alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
-					}).set({
-						'closableByDimmer': false
-					});
+					location.href = url.origin + url.pathname + "?channel=" + username;
 				} else {
 					TAPIC.joinChannel(window.channelname, function() {
 						if ('speechSynthesis' in window) {
