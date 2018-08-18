@@ -536,6 +536,21 @@
 							window.speechQueue.push(obj);
 						}
 					} else if(voicename == "polly") {
+						// 한글 초성 강제 변환
+						string = string.replace(/ㄱ/g,"기역")
+						string = string.replace(/ㄴ/g,"니은")
+						string = string.replace(/ㄷ/g,"디귿")
+						string = string.replace(/ㄹ/g,"리을")
+						string = string.replace(/ㅁ/g,"미음")
+						string = string.replace(/ㅂ/g,"비읍")
+						string = string.replace(/ㅅ/g,"시옷")
+						string = string.replace(/ㅇ/g,"이응")
+						string = string.replace(/ㅈ/g,"지읒")
+						string = string.replace(/ㅊ/g,"치읓")
+						string = string.replace(/ㅋ/g,"키읔")
+						string = string.replace(/ㅌ/g,"티읕")
+						string = string.replace(/ㅍ/g,"피읖")
+						string = string.replace(/ㅎ/g,"히읗")
 						var obj = {};
 						obj.type = "polly"
 						obj.msg = '<speak><prosody rate="' + parseInt(speed * 100) + '%" pitch="' + parseInt(pitch * 100 - 100) + '%">' + string + '</prosody></speak>';
