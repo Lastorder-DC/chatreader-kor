@@ -156,6 +156,9 @@
 		
 		// 구독자 전용
 		window.uniq_voice = localStorage.getItem("uniq_voice") === "false" ? false : true;
+		
+		// 기본 보이스
+		window.def_voice = localStorage.getItem("def_voice") !== null ? localStorage.getItem("def_voice") : "default";
 
 		// 초기화 성공 여부
 		window.initok = false;
@@ -259,6 +262,17 @@
 				if ((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && e.text.match(/!!tts /) !== null) {
 					var command = e.text.replace("!!tts ", "");
 					if (command !== "") {
+						if (command.indexOf("voice ") !== -1) {
+							command = command.replace("voice ", "");
+							if(["default","polly"].indexOf(command) !== -1) {
+								window.def_voice = command;
+								localStorage.setItem("def_voice", command);
+								TAPIC.sendChat("/me [TTSBOT] 기본 보이스가 변경되었습니다 - " + command);
+							} else {
+								TAPIC.sendChat("/me [TTSBOT] 잘못된 보이스입니다 - " + command);
+							}
+						}
+						
 						if (command.indexOf("subonly ") !== -1) {
 							command = command.replace("subonly ", "");
 							if (command == "on" || command == "true" || command == "enable") {
