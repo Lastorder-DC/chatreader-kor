@@ -473,6 +473,12 @@
 			});
 
 			function playText(string, speed, pitch, ignoreKor, nickname, voicename) {
+				string = string.trim();
+				if(string === "") {
+					parseQueue();
+					return;
+				}
+				
 				if ('speechSynthesis' in window) {
 					var i = 0;
 					var google_kor = -1;
