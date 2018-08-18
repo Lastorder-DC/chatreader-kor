@@ -373,7 +373,7 @@
 						var index = window.banlist.indexOf(e.from);
 						var message = e.text;
 						var keyword_test = new RegExp("(" + window.bankeyword.join("|") + ")", "g");
-						var voicename = "default";
+						var voicename = window.def_voice;
 
 						// Personality 적용
 						var personality_range1 = [1, 1.4];
@@ -437,6 +437,12 @@
 						if(message.indexOf("!sy") === 0) {
 							voicename = "polly"
 							message = message.replace("!sy", "").trim();
+						}
+						
+						// !def = default
+						if(message.indexOf("!def") === 0) {
+							voicename = "default"
+							message = message.replace("!def", "").trim();
 						}
 						
 						// !로 시작하는 메세지는 읽지 않음
