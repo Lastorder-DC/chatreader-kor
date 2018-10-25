@@ -1,4 +1,6 @@
 # 채팅 읽어주는 로봇
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FLastorder-DC%2Fchatreader-kor.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FLastorder-DC%2Fchatreader-kor?ref=badge_shield)
+
 트위치용 TTS 봇입니다. 시청자들의 채팅을 TTS로 읽어 줍니다.
 
 ## 사용법
@@ -19,3 +21,7 @@
 
 ## 데모 사이트
 https://lastorder.xyz/chatreader-kor/speech.html
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FLastorder-DC%2Fchatreader-kor.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FLastorder-DC%2Fchatreader-kor?ref=badge_large)
