@@ -484,7 +484,7 @@
 					}
 				});
 
-				function playText(string, speed, pitch, ignoreKor, nickname, voicename) {
+                window.playText = function(string, speed, pitch, ignoreKor, nickname, voicename) {
 					string = string.trim();
 					if (string === "") {
 						parseQueue();
