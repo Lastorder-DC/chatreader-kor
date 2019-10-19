@@ -5,8 +5,8 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css">
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
-	<script src="https://cdn.rawgit.com/Lastorder-DC/tapic/5.0.2.2/dist/tapic.min.js"></script>
-	<script src="https://cdn.rawgit.com/blueimp/JavaScript-MD5/v2.10.0/js/md5.min.js"></script>
+	<script src="https://rawcdn.githack.com/Lastorder-DC/tapic/5.1.0/dist/tapic.min.js"></script>
+	<script src="https://rawcdn.githack.com/blueimp/JavaScript-MD5/v2.10.0/js/md5.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/alertify.min.js"></script>
 	<script src="https://lastorder.xyz/ChattyKathy/ChattyKathy.js"></script>
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/css/alertify.min.css" />
@@ -61,14 +61,11 @@
 		 * @returns {String} message without twitch emoticon
 		 */
 		function replaceTwitchEmoticon(message, emotes) {
-			var ranges;
-			var id;
-			var emote_id;
-			var regExp;
-			var replace_list = {};
+			let ranges, id, emote_id, regExp;
+			const replace_list = {};
 
 			if (typeof emotes != 'undefined') {
-				var emote_list = emotes.split("/");
+				const emote_list = emotes.split("/");
 				emote_list.forEach(function(emote_replace) {
 					ranges = emote_replace.split(":");
 					id = ranges[0];
@@ -81,7 +78,7 @@
 					}
 				});
 
-				for (var replace_id in replace_list) {
+				for (const replace_id in replace_list) {
 					regExp = new RegExp(escapeRegExp(replace_id), "g");
 					message = message.replace(regExp, "");
 				}
@@ -96,13 +93,9 @@
 		 * @param {String} address (OPTIONAL) GET인자를 추출할 주소
 		 * @returns {String} GET인자 값
 		 */
-		function getParams(name, address) {
-			var url = "";
-			var results = "";
-
-			if (typeof address === 'undefined') {
-				address = window.location.href;
-			}
+		function getParams(name, address = window.location.href) {
+			let url = "";
+			let results = "";
 
 			url = new URL(address);
 			if (typeof url.searchParams === 'undefined') {
@@ -117,9 +110,9 @@
 			}
 		}
 
-		var url_string = window.location.href;
-		var url = new URL(url_string);
-		
+		const url_string = window.location.href;
+		const url = new URL(url_string);
+
 		if('speechSynthesis' in window) {
 			console.debug("TTS check done");
 		} else {
@@ -135,7 +128,7 @@
 		window.oauth = localStorage.getItem("oauth") !== null ? localStorage.getItem("oauth") : "";
 
 		// 주소뒤 ?debug=true 로 디버그모드 활성화
-		window.debugmode = getParams("debug") === "true" ? true : false;
+		window.debugmode = getParams("debug") === "true";
 
 		// 읽을 채팅 최대 길이(!!tts maxlength (길이)로 변경가능)
 		window.maxlength = localStorage.getItem("tts_maxlength") !== null ? parseInt(localStorage.getItem("tts_maxlength")) : 40;
@@ -153,10 +146,10 @@
 		window.bankeyword = window.bankeyword.concat(['섹스']);
 		
 		// 구독자 전용
-		window.tts_subonly = localStorage.getItem("tts_subonly") === "true" ? true : false;
+		window.tts_subonly = localStorage.getItem("tts_subonly") === "true";
 		
 		// 구독자 전용
-		window.uniq_voice = localStorage.getItem("uniq_voice") === "false" ? false : true;
+		window.uniq_voice = localStorage.getItem("uniq_voice") !== "false";
 		
 		// 기본 보이스
 		window.def_voice = localStorage.getItem("def_voice") !== null ? localStorage.getItem("def_voice") : "default";
@@ -191,7 +184,7 @@
 		
 		window.change_channel = function() {
 			alertify.prompt('채널 아이디 입력', '연결할 채널 아이디를 입력해주세요. 한글 닉네임 대신 twitch.tv/ 주소 뒤에 붙는 영문 아이디를 입력해주셔야 합니다.', '', function(evt, value) {
-				if (value == "") {
+				if (value === "") {
 					alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
 				} else {
 					window.channelname = value;
@@ -204,12 +197,12 @@
 			});
 		};
 
-		if (window.oauth != "") {
+		if (window.oauth !== "") {
 			// You have to run .setup() before anything besides .listen()
 			TAPIC.setup(window.oauth, function(username) {
 				TAPIC.setRefreshRate(10);
 
-				if (window.channelname == "") {
+				if (window.channelname === "") {
 					location.href = url.origin + url.pathname + "?channel=" + username;
 				} else {
 					TAPIC.joinChannel(window.channelname, function() {
@@ -233,11 +226,11 @@
 							msg.onend = function(event) {
 								var voices = speechSynthesis.getVoices();
 
-								if (voices.length == 0) {
+								if (voices.length === 0) {
 									alert("사용 가능한 TTS DB 없음");
 								} else {
 									speechSynthesis.getVoices().forEach(function(voice) {
-										if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
+										if (voice.lang === "ko_KR" || voice.lang === "ko-KR" || voice.lang === "kr" || voice.lang === "ko") window.korSupport = true;
 									});
 
 									if (!window.korSupport) {
@@ -262,7 +255,7 @@
 			});
 
 			TAPIC.listen('message', function(e) {
-				if ((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && e.text.match(/!!tts /) !== null) {
+				if ((e.mod || e.streamer || e.badges.indexOf("broadcaster/1") !== -1) && e.text.match(/!!tts /) !== null) {
 					var command = e.text.replace("!!tts ", "");
 					if (command !== "") {
 						if (command.indexOf("voice ") !== -1) {
@@ -278,12 +271,12 @@
 						
 						if (command.indexOf("subonly ") !== -1) {
 							command = command.replace("subonly ", "");
-							if (command == "on" || command == "true" || command == "enable") {
+							if (command === "on" || command === "true" || command === "enable") {
 								window.tts_subonly = true;
 								localStorage.setItem("tts_subonly", "true");
 								TAPIC.sendChat("/me [TTSBOT] 구독자 전용 TTS 모드가 활성화되었습니다.");
 							}
-							if (command == "off" || command == "false" || command == "disable") {
+							if (command === "off" || command === "false" || command === "disable") {
 								window.tts_subonly = false;
 								localStorage.setItem("tts_subonly", "false");
 								TAPIC.sendChat("/me [TTSBOT] 구독자 전용 TTS 모드가 비활성화되었습니다.");
@@ -292,12 +285,12 @@
 						
 						if (command.indexOf("uniq ") !== -1) {
 							command = command.replace("uniq ", "");
-							if (command == "on" || command == "true" || command == "enable") {
+							if (command === "on" || command === "true" || command === "enable") {
 								window.uniq_voice = true;
 								localStorage.setItem("uniq_voice", "true");
 								TAPIC.sendChat("/me [TTSBOT] TTS 보이스 개인화가 활성화되었습니다.");
 							}
-							if (command == "off" || command == "false" || command == "disable") {
+							if (command === "off" || command === "false" || command === "disable") {
 								window.uniq_voice = false;
 								localStorage.setItem("uniq_voice", "false");
 								TAPIC.sendChat("/me [TTSBOT] TTS 보이스 개인화가 비활성화되었습니다.");
@@ -316,8 +309,8 @@
 
 						if (command.indexOf("unban ") !== -1) {
 							command = command.replace("unban ", "");
-							if (command != "") {
-								var index = window.banlist.indexOf(command);
+							if (command !== "") {
+								let index = window.banlist.indexOf(command);
 								if (index !== -1) {
 									window.banlist.splice(index, 1);
 									localStorage.setItem("tts_banlist_" + window.channelname, window.banlist.join("|"));
@@ -330,7 +323,7 @@
 							if (command.indexOf("ban ") !== -1) {
 								command = command.replace("ban ", "");
 								if (command != "") {
-									var index = window.banlist.indexOf(command);
+									let index = window.banlist.indexOf(command);
 									if (index === -1) {
 										window.banlist.push(command);
 										localStorage.setItem("tts_banlist_" + window.channelname, window.banlist.join("|"));
@@ -344,8 +337,8 @@
 
 						if (command.indexOf("del ") !== -1) {
 							command = command.replace("del ", "");
-							if (command != "") {
-								var index = window.bankeyword.indexOf(escapeRegExp(command));
+							if (command !== "") {
+								let index = window.bankeyword.indexOf(escapeRegExp(command));
 								if (index !== -1) {
 									window.bankeyword.splice(index, 1);
 									localStorage.setItem("tts_bankeyword_" + window.channelname, window.bankeyword.join("|"));
@@ -357,8 +350,8 @@
 						} else {
 							if (command.indexOf("add ") !== -1) {
 								command = command.replace("add ", "");
-								if (command != "") {
-									var index = window.bankeyword.indexOf(escapeRegExp(command));
+								if (command !== "") {
+									let index = window.bankeyword.indexOf(escapeRegExp(command));
 									if (index === -1) {
 										window.bankeyword.push(escapeRegExp(command));
 										localStorage.setItem("tts_bankeyword_" + window.channelname, window.bankeyword.join("|"));
@@ -373,17 +366,16 @@
 				} else {
 					// 초기화 후에만 읽음
 					if (window.initok) {
-						var index = window.banlist.indexOf(e.from);
-						var message = e.text;
-						var keyword_test = new RegExp("(" + window.bankeyword.join("|") + ")", "g");
-						var voicename = window.def_voice;
+						const index = window.banlist.indexOf(e.from);
+						let message = e.text;
+						const keyword_test = new RegExp("(" + window.bankeyword.join("|") + ")", "g");
+						let voicename = window.def_voice;
 
 						// Personality 적용
-						var personality_range1 = [1, 1.4];
-						var personality_range2 = [0.9, 1.2];
+						const personality_range1 = [1, 1.4];
+						const personality_range2 = [0.9, 1.2];
 
-						var personality_int1 = 0,
-						    personality_int2 = 0;
+						let personality_int1 = 0, personality_int2 = 0;
 
 						// 금지단어 포함 메세지 전체 읽지 않음
 						if (keyword_test.test(message)) return;
@@ -438,13 +430,13 @@
 						
 						// !sy = polly
 						if(message.indexOf("!sy") === 0) {
-							voicename = "polly"
+							voicename = "polly";
 							message = message.replace("!sy", "").trim();
 						}
 						
 						// !def = default
 						if(message.indexOf("!def") === 0) {
-							voicename = "default"
+							voicename = "default";
 							message = message.replace("!def", "").trim();
 						}
 						
@@ -456,9 +448,9 @@
 
 						// 트위치 이모티콘은 읽지 않음
 						message = replaceTwitchEmoticon(message, e.emotes);
-						if (message != "") {
+						if (message !== "") {
 							// 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
-							if (((e.mod && index < 0) || e.streamer || e.badges.indexOf("broadcaster/1") != -1) && message.length < 120) {
+							if (((e.mod && index < 0) || e.streamer || e.badges.indexOf("broadcaster/1") !== -1) && message.length < 120) {
 								playText(message, personality_speed, personality_pitch, false, e.from, voicename);
 							} else {
 								// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
@@ -483,28 +475,28 @@
 				}
 				
 				if ('speechSynthesis' in window) {
-					var i = 0;
-					var google_kor = -1;
-					var google_jpn = -1;
-					var check = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
-					var check_jp = /[\u3040-\u30ff\u31f0-\u31ff]/;
-					
+					let i = 0;
+					let google_kor = -1;
+					let google_jpn = -1;
+					const check = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/;
+					const check_jp = /[\u3040-\u30ff\u31f0-\u31ff]/;
+
 					if(typeof voicename === 'undefined') voicename = "default";
 					
-					if(voicename == "default") {
+					if(voicename === "default") {
 						speechSynthesis.getVoices().forEach(function(voice) {
 							if (check.test(string)) {
-								if (voice.lang == "ko_KR" || voice.lang == "ko-KR" || voice.lang == "kr" || voice.lang == "ko") window.korSupport = true;
-								if (voice.lang == "ko-KR" && voice.name.indexOf("Google") !== -1) {
+								if (voice.lang === "ko_KR" || voice.lang === "ko-KR" || voice.lang === "kr" || voice.lang === "ko") window.korSupport = true;
+								if (voice.lang === "ko-KR" && voice.name.indexOf("Google") !== -1) {
 									google_kor = i;
 								}
 							} else if (check_jp.test(string)) {
-								if (voice.lang == "ja_JP" || voice.lang == "ja-JP" || voice.lang == "jp" || voice.lang == "ja") window.jpnSupport = true;
-								if (voice.lang == "ja-JP" && voice.name.indexOf("Google") !== -1) {
+								if (voice.lang === "ja_JP" || voice.lang === "ja-JP" || voice.lang === "jp" || voice.lang === "ja") window.jpnSupport = true;
+								if (voice.lang === "ja-JP" && voice.name.indexOf("Google") !== -1) {
 									google_jpn = i;
 								}
 							} else {
-								if (voice.lang == "en-US" && voice.name.indexOf("Google") !== -1) {
+								if (voice.lang === "en-US" && voice.name.indexOf("Google") !== -1) {
 									google_kor = i;
 								}
 							}
@@ -513,7 +505,7 @@
 						});
 
 						if (window.korSupport || ignoreKor) {
-							var msg = new SpeechSynthesisUtterance(string);
+							const msg = new SpeechSynthesisUtterance(string);
 
 							if (check.test(string)) msg.lang = "ko-KR";
 							else if (check_jp.test(string)) msg.lang = "ja-JP";
@@ -524,37 +516,37 @@
 							msg.rate = speed;
 							msg.pitch = pitch;
 							msg.onstart = function(event) {
-								if (typeof event.utterance.from == "undefined" || event.utterance.from == "") event.utterance.from = "Unknown";
+								if (typeof event.utterance.from == "undefined" || event.utterance.from === "") event.utterance.from = "Unknown";
 								document.getElementById("last_read").innerHTML = "<b>" + event.utterance.from + "</b>:" + event.utterance.text;
-							}
+							};
 							msg.onend = function(event) {
 								if (window.debugmode) console.log("msg read event");
 								if (window.debugmode) console.log(event);
-							}
+							};
 							//window.speechSynthesis.speak(msg);
-							var obj = {};
-							obj.type = "default"
+							let obj = {};
+							obj.type = "default";
 							obj.msg = msg;
 							window.speechQueue.push(obj);
 						}
-					} else if(voicename == "polly") {
+					} else if(voicename === "polly") {
 						// 한글 초성 강제 변환
-						string = string.replace(/ㄱ/g,"기역")
-						string = string.replace(/ㄴ/g,"니은")
-						string = string.replace(/ㄷ/g,"디귿")
-						string = string.replace(/ㄹ/g,"리을")
-						string = string.replace(/ㅁ/g,"미음")
-						string = string.replace(/ㅂ/g,"비읍")
-						string = string.replace(/ㅅ/g,"시옷")
-						string = string.replace(/ㅇ/g,"이응")
-						string = string.replace(/ㅈ/g,"지읒")
-						string = string.replace(/ㅊ/g,"치읓")
-						string = string.replace(/ㅋ/g,"키읔")
-						string = string.replace(/ㅌ/g,"티읕")
-						string = string.replace(/ㅍ/g,"피읖")
-						string = string.replace(/ㅎ/g,"히읗")
+						string = string.replace(/ㄱ/g,"기역");
+						string = string.replace(/ㄴ/g,"니은");
+						string = string.replace(/ㄷ/g,"디귿");
+						string = string.replace(/ㄹ/g,"리을");
+						string = string.replace(/ㅁ/g,"미음");
+						string = string.replace(/ㅂ/g,"비읍");
+						string = string.replace(/ㅅ/g,"시옷");
+						string = string.replace(/ㅇ/g,"이응");
+						string = string.replace(/ㅈ/g,"지읒");
+						string = string.replace(/ㅊ/g,"치읓");
+						string = string.replace(/ㅋ/g,"키읔");
+						string = string.replace(/ㅌ/g,"티읕");
+						string = string.replace(/ㅍ/g,"피읖");
+						string = string.replace(/ㅎ/g,"히읗");
 						var obj = {};
-						obj.type = "polly"
+						obj.type = "polly";
 						obj.msg = '<speak><prosody rate="' + parseInt(speed * 100) + '%" pitch="' + parseInt(pitch * 100 - 100) + '%">' + string + '</prosody></speak>';
 						window.speechQueue.push(obj);
 					}
@@ -564,15 +556,15 @@
 			}
 		} else {
 			// there's no oauth key
-			if (document.location.hash != "" && document.location.hash.indexOf("access_token") !== -1) {
+			if (document.location.hash !== "" && document.location.hash.indexOf("access_token") !== -1) {
 				//user already authed
-				var rawauth = document.location.href.replace("#", "?");
-				var authobj = new URL(rawauth);
-				var oauth = getParams("access_token", rawauth);
-				var state = getParams("state", rawauth);
-				var localstate = localStorage.getItem("state");
-				var last_url = localStorage.getItem("last_url");
-				var last_url_obj = new URL(last_url);
+				const rawauth = document.location.href.replace("#", "?");
+				const authobj = new URL(rawauth);
+				const oauth = getParams("access_token", rawauth);
+				const state = getParams("state", rawauth);
+				const localstate = localStorage.getItem("state");
+				const last_url = localStorage.getItem("last_url");
+				const last_url_obj = new URL(last_url);
 
 				document.body.innerHTML = '';
 
@@ -590,7 +582,7 @@
 				}
 			} else {
 				//not authed yet
-				var state = md5(Date.now());
+				const state = md5(Date.now());
 				localStorage.setItem("state", state);
 				localStorage.setItem("last_url", location.href);
 
