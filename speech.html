@@ -6,7 +6,7 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css">
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.12.4/jquery.min.js" integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ=" crossorigin="anonymous"></script>
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
-	<script src="https://rawcdn.githack.com/Lastorder-DC/tapic/5.1.0/dist/tapic.min.js"></script>
+	<script src="https://rawcdn.githack.com/Lastorder-DC/tapic/5.0.2.2/dist/tapic.min.js"></script>
 	<script src="https://rawcdn.githack.com/blueimp/JavaScript-MD5/v2.10.0/js/md5.min.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/alertify.min.js"></script>
 	<script src="https://lastorder.xyz/ChattyKathy/ChattyKathy.js"></script>
@@ -127,6 +127,8 @@
 		// 주소뒤 ?channel=(채널아이디) 로 지정
 		window.channelname = getParams("channel");
 
+		window.isclicked = false;
+
 		if (window.channelname === null) window.channelname = "";
 
 		// oauth token으로 처음 페이지 접속시 트위치 로그인으로 생성함(로컬스토리지 저장, 로그아웃시 초기화됨)
@@ -203,6 +205,8 @@
 		};
 		if (window.oauth !== "") {
 			$(document).on('click', function() {
+				if(window.isclicked) return;
+				window.isclicked = true;
 				document.getElementById("divClick").style.display = "none";
 				document.getElementById("divContent").style.display = "block";
 
@@ -469,7 +473,7 @@
 									// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
 									if (index === -1 && message.length < window.maxlength) {
 										if (window.tts_subonly) {
-											if (e.sub) playText(message, personality_speed, personality_pitch, false, e.from, voicename);
+											if (e.sub|| e.badges.indexOf("founder") !== -1) playText(message, personality_speed, personality_pitch, false, e.from, voicename);
 										} else {
 											playText(message, personality_speed, personality_pitch, false, e.from, voicename);
 										}
