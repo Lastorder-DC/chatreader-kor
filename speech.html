@@ -155,7 +155,10 @@
 		// 구독자 전용
 		window.tts_subonly = localStorage.getItem("tts_subonly") === "true";
 
-		// 구독자 전용
+		// 개설자 전용
+		window.tts_founderonly = localStorage.getItem("tts_founderonly") === "true";
+
+		// 보이스 개인화 설정
 		window.uniq_voice = localStorage.getItem("uniq_voice") !== "false";
 
 		// 기본 보이스
@@ -297,6 +300,20 @@
 									window.tts_subonly = false;
 									localStorage.setItem("tts_subonly", "false");
 									TAPIC.sendChat("/me [TTSBOT] 구독자 전용 TTS 모드가 비활성화되었습니다.");
+								}
+							}
+
+							if (command.indexOf("founderonly ") !== -1) {
+								command = command.replace("founderonly ", "");
+								if (command === "on" || command === "true" || command === "enable") {
+									window.tts_founderonly = true;
+									localStorage.setItem("tts_founderonly", "true");
+									TAPIC.sendChat("/me [TTSBOT] 개설자 전용 TTS 모드가 활성화되었습니다.");
+								}
+								if (command === "off" || command === "false" || command === "disable") {
+									window.tts_founderonly = false;
+									localStorage.setItem("tts_founderonly", "false");
+									TAPIC.sendChat("/me [TTSBOT] 개설자 전용 TTS 모드가 비활성화되었습니다.");
 								}
 							}
 
@@ -473,7 +490,9 @@
 									// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
 									if (index === -1 && message.length < window.maxlength) {
 										if (window.tts_subonly) {
-											if (e.sub|| e.badges.indexOf("founder") !== -1) playText(message, personality_speed, personality_pitch, false, e.from, voicename);
+											if (e.sub || e.founder) playText(message, personality_speed, personality_pitch, false, e.from, voicename);
+										} else if (window.tts_founderonly) {
+											if (e.founder) playText(message, personality_speed, personality_pitch, false, e.from, voicename);
 										} else {
 											playText(message, personality_speed, personality_pitch, false, e.from, voicename);
 										}
