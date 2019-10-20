@@ -163,6 +163,7 @@
 		window.stopScroll = localStorage.getItem("autoscroll") === "false";
 		if(!window.stopScroll) {
 			document.getElementById("chk-autoscroll").checked = true;
+            scrollBottom();
 		}
 
 		if (window.channelname === null) window.channelname = "";
