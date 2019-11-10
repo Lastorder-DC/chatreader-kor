@@ -638,6 +638,7 @@
 							const obj = {};
 							obj.type = "polly";
 							obj.msg = '<speak><prosody rate="' + parseInt(speed * 100) + '%" pitch="' + parseInt(pitch * 100 - 100) + '%">' + string + '</prosody></speak>';
+							obj.volume = window.volume / 100;
 							window.speechQueue.push(obj);
 						}
 
@@ -707,7 +708,7 @@
 					window.speechSynthesis.speak(obj.msg);
 				} else if (obj.type === "polly") {
 					console.debug("Amazon Polly - " + obj.msg);
-					window.kathy.SetVolume(window.volume);
+					window.kathy.SetVolume(obj.volume);
 					window.kathy.Speak(obj.msg);
 				} else {
 					console.warn("ERROR - Type " + obj.type + " is not supported.");
