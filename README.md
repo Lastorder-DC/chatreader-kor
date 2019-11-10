@@ -22,6 +22,7 @@ https://lastorder.xyz/chatreader-kor/speech.html
 | ban       | 차단할 시청자     | 시청자를 TTS 금지 목록에 추가합니다. TTS 금지 목록 시청자의 채팅은 읽지 않습니다.                     | !!tts ban 나쁜시청자   |
 | unban     | 차단해제할 시청자 | 시청자를 TTS 금지 목록에서 제외합니다.                                                                | !!tts unban 나쁜시청자 |
 | maxlength | 최대 채팅 길이    | 읽어줄 최대 채팅 길이를 지정합니다. 이보다 긴 채팅은 읽지 않습니다.                                   | !!tts maxlength 80     |
+| volume | 최대 볼륨        | TTS 볼륨을 설정합니다. 1에서 100사이 값으로 지정하실수 있습니다.                                 | !!tts volume 80     |
 | subonly   | on, off           | 구독자 전용 채팅 모드를 활성화/비활성화 합니다. 활성화시 구독하지 않은 시청자의 채팅은 읽지 않습니다. | !!tts subonly on       |
 | founderonly   | on, off           | 개설자 전용 채팅 모드를 활성화/비활성화 합니다. 활성화시 구독자 중 개설자 뱃지가 없는 시청자의 채팅은 읽지 않습니다. | !!tts founderonly on       |
 | uniq   | on, off           | TTS 보이스 개인화 설정을 활성화/비활성화 합니다. 활성화시 닉네임에 따라 피치/속도가 바뀝니다. (기본 활성화) | !!tts uniq off       |
