@@ -177,6 +177,9 @@
 		// 읽을 채팅 최대 길이(!!tts maxlength (길이)로 변경가능)
 		window.maxlength = localStorage.getItem("tts_maxlength") !== null ? parseInt(localStorage.getItem("tts_maxlength")) : 40;
 
+		// 읽을 채팅 음량 (!!tts volume (음량)으로 변경가능)
+		window.volume = localStorage.getItem("tts_volume") !== null ? parseInt(localStorage.getItem("tts_volume")) : 100;
+
 		// 밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
 		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist_" + window.channelname).split("|") : [];
 
@@ -375,6 +378,16 @@
 									if (window.maxlength > 120) window.maxlength = 120;
 									localStorage.setItem("tts_maxlength", window.maxlength.toString());
 									TAPIC.sendChat("/me [TTSBOT] 최대 TTS 글자수가 " + window.maxlength.toString() + "글자로 바뀌었습니다.");
+								}
+							}
+
+							if (command.indexOf("volume ") !== -1) {
+								command = command.replace("volume ", "");
+								if (parseInt(command) > 0) {
+									window.volume = parseInt(command);
+									if (window.volume > 100) window.volume = 100;
+									localStorage.setItem("tts_volume", window.volume.toString());
+									TAPIC.sendChat("/me [TTSBOT] TTS 볼륨이 " + window.volume.toString() + "로 바뀌었습니다.");
 								}
 							}
 
@@ -598,7 +611,9 @@
 									if (window.debugmode) console.log("msg read event");
 									if (window.debugmode) console.log(event);
 								};
-								//window.speechSynthesis.speak(msg);
+
+								msg.volume = window.volume / 100;
+
 								let obj = {};
 								obj.type = "default";
 								obj.msg = msg;
@@ -692,6 +707,7 @@
 					window.speechSynthesis.speak(obj.msg);
 				} else if (obj.type === "polly") {
 					console.debug("Amazon Polly - " + obj.msg);
+					window.kathy.SetVolume(window.volume);
 					window.kathy.Speak(obj.msg);
 				} else {
 					console.warn("ERROR - Type " + obj.type + " is not supported.");
