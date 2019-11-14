@@ -605,7 +605,8 @@
 								msg.pitch = pitch;
 								msg.onstart = function (event) {
 									if (typeof event.utterance.from == "undefined" || event.utterance.from === "") event.utterance.from = "Unknown";
-									document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='cursor: pointer;' onclick='banUser(\"" + event.utterance.from + "\")'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
+									if (event.utterance.from !== "SYSTEM") document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='cursor: pointer;' onclick='banUser(\"" + event.utterance.from + "\")'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
+									else document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='color: #666' onclick='return false;'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
 								};
 								msg.onend = function (event) {
 									if (window.debugmode) console.log("msg read event");
