@@ -534,8 +534,8 @@
 							message = replaceTwitchEmoticon(message, e.emotes);
 							if (message !== "") {
 								// 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
-								if (((e.mod && index < 0) || e.streamer || e.badges.indexOf("broadcaster/1") !== -1) && message.length < 120) {
-									playText(message, personality_speed, personality_pitch, false, e.from, voicename);
+								if (((e.mod && index === -1) || e.streamer || e.badges.indexOf("broadcaster/1") !== -1) && message.length < 120) {
+									playText(message, personality_speed, personality_pitch, false, e.from, voicename, (!e.streamer && e.badges.indexOf("broadcaster/1") === -1));
 								} else {
 									// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
 									if (index === -1 && message.length < window.maxlength) {
@@ -555,7 +555,7 @@
 					}
 				});
 
-                window.playText = function(string, speed, pitch, ignoreKor, nickname, voicename) {
+                window.playText = function(string, speed, pitch, ignoreKor, nickname, voicename, banable) {
 					string = string.trim();
 					if (string === "") {
 						parseQueue();
@@ -605,7 +605,7 @@
 								msg.pitch = pitch;
 								msg.onstart = function (event) {
 									if (typeof event.utterance.from == "undefined" || event.utterance.from === "") event.utterance.from = "Unknown";
-									if (event.utterance.from !== "SYSTEM") document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='cursor: pointer;' onclick='banUser(\"" + event.utterance.from + "\")'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
+									if (banable && event.utterance.from !== "SYSTEM") document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='cursor: pointer;' onclick='banUser(\"" + event.utterance.from + "\")'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
 									else document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='color: #666' onclick='return false;'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
 								};
 								msg.onend = function (event) {
