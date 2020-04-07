@@ -261,7 +261,7 @@
 						location.href = url.origin + url.pathname + "?channel=" + username;
 					} else {
 						TAPIC.joinChannel(window.channelname, function () {
-							if ('speechSynthesis' in window) {
+							if ('speechSynthesis' in window && window.speechSynthesis.getVoices().length !== 0) {
 								window.korSupport = false;
 								window.utterances = [];
 
