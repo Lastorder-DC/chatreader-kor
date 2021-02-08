@@ -182,6 +182,9 @@
 
 		// 밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
 		window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist_" + window.channelname).split("|") : [];
+		
+		// 화이트리스트(로컬스토리지 저장, !!tts addlist (아이디) 로 추가하고 !!tts removelist (아이디)로 삭제)
+		window.whitelist = localStorage.getItem("tts_whitelist_" + window.channelname) !== null ? localStorage.getItem("tts_whitelist_" + window.channelname).split("|") : [];
 
 		// 밴키워드(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
 		window.bankeyword = localStorage.getItem("tts_bankeyword_" + window.channelname) !== null ? localStorage.getItem("tts_bankeyword_" + window.channelname).split("|") : [];
@@ -413,8 +416,36 @@
 											localStorage.setItem("tts_banlist_" + window.channelname, window.banlist.join("|"));
 											TAPIC.sendChat("/me [TTSBOT] 시청자 " + command + " 를 차단했습니다.");
 										} else {
-											TAPIC.sendChat("/me [TTSBOT] 시청자 " + command + " 은 이미 차단되어 있습니다.");
+											TAPIC.sendChat("/me [TTSBOT] 시청자 " + command + " 는 이미 차단되어 있습니다.");
 										}
+									}
+								}
+							}
+							
+							if (command.indexOf("removelist ") !== -1) {
+								command = command.replace("removelist ", "");
+								if (command !== "") {
+									let index = window.whitelist.indexOf(command);
+									if (index !== -1) {
+										window.whitelist.splice(index, 1);
+										localStorage.setItem("tts_whitelist_" + window.channelname, window.whitelist.join("|"));
+										TAPIC.sendChat("/me [TTSBOT] 시청자 " + command + " 를 화이트리스트에서 삭제했습니다.");
+									} else {
+										TAPIC.sendChat("/me [TTSBOT] 시청자 " + command + " 는 화이트리스트에 없습니다.");
+									}
+								}
+							}
+							
+							if (command.indexOf("addlist ") !== -1) {
+								command = command.replace("addlist ", "");
+								if (command !== "") {
+									let index = window.whitelist.indexOf(command);
+									if (index === -1) {
+										window.whitelist.push(command);
+										localStorage.setItem("tts_whitelist_" + window.channelname, window.whitelist.join("|"));
+										TAPIC.sendChat("/me [TTSBOT] 시청자 " + command + " 를 화이트리스트에 추가했습니다.");
+									} else {
+										TAPIC.sendChat("/me [TTSBOT] 시청자 " + command + " 는 이미 화이트리스트에 있습니다.");
 									}
 								}
 							}
@@ -431,18 +462,18 @@
 										TAPIC.sendChat("/me [TTSBOT] 키워드 " + command + " 는 차단되어 있지 않습니다.");
 									}
 								}
-							} else {
-								if (command.indexOf("add ") !== -1) {
-									command = command.replace("add ", "");
-									if (command !== "") {
-										let index = window.bankeyword.indexOf(escapeRegExp(command));
-										if (index === -1) {
-											window.bankeyword.push(escapeRegExp(command));
-											localStorage.setItem("tts_bankeyword_" + window.channelname, window.bankeyword.join("|"));
-											TAPIC.sendChat("/me [TTSBOT] 키워드 " + command + " 를 차단했습니다.");
-										} else {
-											TAPIC.sendChat("/me [TTSBOT] 키워드 " + command + " 은 이미 차단되어 있습니다.");
-										}
+							}
+							
+							if (command.indexOf("add ") !== -1) {
+								command = command.replace("add ", "");
+								if (command !== "") {
+									let index = window.bankeyword.indexOf(escapeRegExp(command));
+									if (index === -1) {
+										window.bankeyword.push(escapeRegExp(command));
+										localStorage.setItem("tts_bankeyword_" + window.channelname, window.bankeyword.join("|"));
+										TAPIC.sendChat("/me [TTSBOT] 키워드 " + command + " 를 차단했습니다.");
+									} else {
+										TAPIC.sendChat("/me [TTSBOT] 키워드 " + command + " 은 이미 차단되어 있습니다.");
 									}
 								}
 							}
