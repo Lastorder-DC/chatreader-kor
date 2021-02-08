@@ -422,6 +422,18 @@
 								}
 							}
 							
+							if (command.indexOf("clearban") !== -1) {
+								window.banlist = ['Nightbot', '싹둑'];
+								localStorage.setItem("tts_banlist_" + window.channelname, window.banlist.join("|"));
+								TAPIC.sendChat("/me [TTSBOT] 차단 목록을 초기화했습니다.");
+							}
+							
+							if (command.indexOf("clearlist") !== -1) {
+								window.whitelist = [];
+								localStorage.setItem("tts_whitelist_" + window.channelname, window.whitelist.join("|"));
+								TAPIC.sendChat("/me [TTSBOT] 화이트리스트를 초기화했습니다.");
+							}
+							
 							if (command.indexOf("removelist ") !== -1) {
 								command = command.replace("removelist ", "");
 								if (command !== "") {
@@ -482,6 +494,7 @@
 						// 초기화 후에만 읽음
 						if (window.initok) {
 							const index = window.banlist.indexOf(e.from);
+							const index_whitelist = window.whitelist.length != 0 ? window.whitelist.indexOf(e.from) : 0;
 							let message = e.text;
 							const keyword_test = new RegExp("(" + window.bankeyword.join("|") + ")", "g");
 							let voicename = window.def_voice;
@@ -568,8 +581,8 @@
 								if (((e.mod && index === -1) || e.streamer || e.badges.indexOf("broadcaster/1") !== -1) && message.length < 120) {
 									playText(message, personality_speed, personality_pitch, false, e.from, voicename, (!e.streamer && e.badges.indexOf("broadcaster/1") === -1));
 								} else {
-									// 밴리스트에 없는 아이디면서 채팅 길이가 지정된 길이 미만
-									if (index === -1 && message.length < window.maxlength) {
+									// 화이트리스트 사용시 화이트리스트에 있는 아이디 + 밴리스트에 없는 아이디 + 채팅 길이가 지정된 길이 미만
+									if (index_whitelist !== -1 && index === -1 && message.length < window.maxlength) {
 										if (window.tts_subonly) {
 											if (e.sub || e.founder) playText(message, personality_speed, personality_pitch, false, e.from, voicename);
 										} else if (window.tts_founderonly) {
