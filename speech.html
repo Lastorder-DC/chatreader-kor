@@ -11,7 +11,7 @@
     <script src="https://rawcdn.githack.com/blueimp/JavaScript-MD5/v2.10.0/js/md5.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/alertify.min.js"></script>
     <script src="https://chattykathy.lastorder.tk/ChattyKathy.js"></script>
-	<script src="./tts.js"></script>
+    <script src="./tts.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/css/alertify.min.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.11.0/css/themes/bootstrap.min.css" />
 </head>
@@ -50,8 +50,8 @@
 
         // 인증후 돌아올 페이지(현재 페이지 주소)를 입력합니다.
         window.oauth_redirect_uri = "https://lastorder.xyz/chatreader-kor/speech.html";
-		
-		// ==================================
+        
+        // ==================================
         // !! 이 아래로는 수정하지 마세요! !!
         // ==================================
         const url_string = window.location.href;
@@ -65,16 +65,19 @@
 
         // 주소뒤 ?channel=(채널아이디) 로 지정
         window.channelname = getParams("channel");
-
+        
+        // 채널명 없으면 비워둠
+        if (window.channelname === null) window.channelname = "";
+        
+        // 클릭 여부 저장
         window.isclicked = false;
-
+        
+        // 자동스크롤 중단 여부
         window.stopScroll = localStorage.getItem("autoscroll") === "false";
         if(!window.stopScroll) {
             document.getElementById("chk-autoscroll").checked = true;
             scrollBottom();
         }
-
-        if (window.channelname === null) window.channelname = "";
 
         // oauth token으로 처음 페이지 접속시 트위치 로그인으로 생성함(로컬스토리지 저장, 로그아웃시 초기화됨)
         window.oauth = localStorage.getItem("oauth") !== null ? localStorage.getItem("oauth") : "";
@@ -88,10 +91,10 @@
         // 읽을 채팅 음량 (!!tts volume (음량)으로 변경가능)
         window.volume = localStorage.getItem("tts_volume") !== null ? parseInt(localStorage.getItem("tts_volume")) : 100;
 
-        // 밴리스트(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
+        // 차단 목록(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
         window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist_" + window.channelname).split("|") : [];
         
-        // 화이트리스트(로컬스토리지 저장, !!tts addlist (아이디) 로 추가하고 !!tts removelist (아이디)로 삭제)
+        // 허용 목록(로컬스토리지 저장, !!tts addlist (아이디) 로 추가하고 !!tts removelist (아이디)로 삭제)
         window.whitelist = localStorage.getItem("tts_whitelist_" + window.channelname) !== null ? localStorage.getItem("tts_whitelist_" + window.channelname).split("|") : [];
 
         // 밴키워드(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
@@ -102,17 +105,17 @@
 
         // 기본적으로 밴할 키워드
         window.bankeyword = window.bankeyword.concat(['섹스']);
-		
-		// 각 리스트 모두 중복 제거
-		window.banlist = window.banlist.filter(function(item, pos) {
-			return window.banlist.indexOf(item) == pos;
-		});
-		window.whitelist = window.whitelist.filter(function(item, pos) {
-			return window.whitelist.indexOf(item) == pos;
-		});
-		window.bankeyword = window.bankeyword.filter(function(item, pos) {
-			return window.bankeyword.indexOf(item) == pos;
-		});
+        
+        // 각 리스트 모두 중복 제거
+        window.banlist = window.banlist.filter(function(item, pos) {
+            return window.banlist.indexOf(item) == pos;
+        });
+        window.whitelist = window.whitelist.filter(function(item, pos) {
+            return window.whitelist.indexOf(item) == pos;
+        });
+        window.bankeyword = window.bankeyword.filter(function(item, pos) {
+            return window.bankeyword.indexOf(item) == pos;
+        });
 
         // 구독자 전용
         window.tts_subonly = localStorage.getItem("tts_subonly") === "true";
@@ -153,7 +156,7 @@
         window.kathy = new ChattyKathy(settings);
         window.users = [];
         window.speechQueue = [];
-		
+        
         if (window.oauth !== "") {
             $(document).on('click', function() {
                 if(window.isclicked) return;
@@ -174,8 +177,8 @@
                 });
 
                 TAPIC.listen('message', function (e) {
-					parseMessage(e);
-				});
+                    parseMessage(e);
+                });
             });
         } else {
             // there's no oauth key
