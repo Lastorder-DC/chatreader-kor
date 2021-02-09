@@ -2,22 +2,50 @@
  * @file TTS Helper script
  * @copyright Lastorder-DC 2017-2021
  */
+ 
+window.success = window.createNotification({
+	closeOnClick: false,
+	displayCloseButton: true,
+	positionClass: 'nfc-top-left',
+	showDuration: 3000,
+	theme: 'success'
+});
+
+window.warning = window.createNotification({
+	closeOnClick: false,
+	displayCloseButton: true,
+	positionClass: 'nfc-top-left',
+	showDuration: 3000,
+	theme: 'warning'
+});
+
+window.error = window.createNotification({
+	closeOnClick: false,
+	displayCloseButton: true,
+	positionClass: 'nfc-top-left',
+	showDuration: 3000,
+	theme: 'error'
+});
+
+window.plain = window.createNotification({
+	closeOnClick: false,
+	displayCloseButton: true,
+	positionClass: 'nfc-top-left',
+	showDuration: 3000,
+	theme: 'none'
+});
 
 /**
  * 채널 변경 함수
  */
 function change_channel() {
-	alertify.prompt('채널 아이디 입력', '연결할 채널 아이디를 입력해주세요. 한글 닉네임 대신 twitch.tv/ 주소 뒤에 붙는 영문 아이디를 입력해주셔야 합니다.', '', function (evt, value) {
-		if (value === "") {
-			alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
+	bootbox.prompt("This is the default prompt!", function(result){ 
+		if (result === "" || result == null) {
+			location.reload()
 		} else {
 			window.channelname = value;
 			location.href = url.origin + url.pathname + "?channel=" + value;
 		}
-	}, function () {
-		alertify.error('채널명이 비어있으므로 동작할 수 없습니다.');
-	}).set({
-		'closableByDimmer': false
 	});
 }
 
@@ -37,8 +65,14 @@ function scrollBottom() {
  * @param {Boolean} usecoloredchat 색챗 사용여부(미사용)
  */
 function displayResultFromUI(result, msg, usecoloredchat = true) {
-	if(result) alertify.notify(msg);
-	else alertify.error(msg);
+	if(result) window.success({ 
+		title: '작업 성공',
+		message: msg 
+	});
+	else window.error({ 
+		title: '작업 실패',
+		message: msg 
+	});
 }
 
 /**
