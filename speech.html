@@ -96,7 +96,7 @@
         window.banlist = localStorage.getItem("tts_banlist_" + window.channelname) !== null ? localStorage.getItem("tts_banlist_" + window.channelname).split("|") : [];
         
         // 허용 목록(로컬스토리지 저장, !!tts addlist (아이디) 로 추가하고 !!tts removelist (아이디)로 삭제)
-        window.whitelist = localStorage.getItem("tts_whitelist_" + window.channelname) !== null ? localStorage.getItem("tts_whitelist_" + window.channelname).split("|") : [];
+        window.whitelist = (localStorage.getItem("tts_whitelist_" + window.channelname) !== null && localStorage.getItem("tts_whitelist_" + window.channelname) !== "") ? localStorage.getItem("tts_whitelist_" + window.channelname).split("|") : [];
 
         // 밴키워드(로컬스토리지 저장, !!tts ban (아이디) 로 밴하고 !!tts unban (아이디)로 밴 해제)
         window.bankeyword = localStorage.getItem("tts_bankeyword_" + window.channelname) !== null ? localStorage.getItem("tts_bankeyword_" + window.channelname).split("|") : [];
