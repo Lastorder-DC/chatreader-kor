@@ -108,15 +108,21 @@
         window.bankeyword = window.bankeyword.concat(['섹스']);
         
         // 각 리스트 모두 중복 제거
-        window.banlist = window.banlist.filter(function(item, pos) {
-            return window.banlist.indexOf(item) == pos;
-        });
-        window.whitelist = window.whitelist.filter(function(item, pos) {
-            return window.whitelist.indexOf(item) == pos;
-        });
-        window.bankeyword = window.bankeyword.filter(function(item, pos) {
-            return window.bankeyword.indexOf(item) == pos;
-        });
+        if(window.banlist.length != 0) {
+            window.banlist = window.banlist.filter(function(item, pos) {
+                return window.banlist.indexOf(item) == pos;
+            });
+        }
+        if(window.whitelist.length != 0) {
+            window.whitelist = window.whitelist.filter(function(item, pos) {
+                return window.whitelist.indexOf(item) == pos;
+            });
+        }
+        if(window.bankeyword.length != 0) {
+            window.bankeyword = window.bankeyword.filter(function(item, pos) {
+                return window.bankeyword.indexOf(item) == pos;
+            });
+        }
 
         // 구독자 전용
         window.tts_subonly = localStorage.getItem("tts_subonly") === "true";
