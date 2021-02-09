@@ -338,7 +338,7 @@ function checkTTS() {
 		speechSynthesis.cancel();
 
 		msg.onerror = function (event) {
-			console.debug("onerror event - " + event);
+			console.debug("onerror event - " + JSON.stringify(event));
 			if (speechSynthesis.getVoices().length === 0) {
 				document.getElementById("last_read").innerHTML = "사용 가능한 TTS 보이스가 없습니다.";
 			} else {
@@ -348,7 +348,7 @@ function checkTTS() {
 		};
 
 		msg.onend = function (event) {
-			console.debug("onend event - " + event);
+			console.debug("onend event - " + JSON.stringify(event));
 			const voices = speechSynthesis.getVoices();
 
 			if (voices.length === 0) {
