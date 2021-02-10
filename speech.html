@@ -82,8 +82,8 @@
 
         // oauth token으로 처음 페이지 접속시 트위치 로그인으로 생성함(로컬스토리지 저장, 로그아웃시 초기화됨)
         window.oauth = localStorage.getItem("oauth") !== null ? localStorage.getItem("oauth") : "";
-        window.login = localStorage.getItem("login") !== null ? localStorage.getItem("login") : "";
-        window.display_name = localStorage.getItem("display_name") !== null ? localStorage.getItem("display_name") : "";
+        window.login = localStorage.getItem("login") !== null && localStorage.getItem("login") !== "undefined" ? localStorage.getItem("login") : "";
+        window.display_name = localStorage.getItem("display_name") !== null && localStorage.getItem("display_name") !== "undefined" ? localStorage.getItem("display_name") : "";
 
         // 주소뒤 ?debug=true 로 디버그모드 활성화
         window.debugmode = getParams("debug") === "true";
@@ -219,8 +219,8 @@
                             return response.json();
                         })
                         .then(function(result) {
-                            localStorage.setItem("login", result.login);
-                            localStorage.setItem("display_name", result.display_name);
+                            localStorage.setItem("login", result.data[0].login);
+                            localStorage.setItem("display_name", result.data[0].display_name);
                             
                             location.href = last_url;
                         });
