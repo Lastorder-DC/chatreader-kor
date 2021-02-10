@@ -82,6 +82,8 @@
 
         // oauth token으로 처음 페이지 접속시 트위치 로그인으로 생성함(로컬스토리지 저장, 로그아웃시 초기화됨)
         window.oauth = localStorage.getItem("oauth") !== null ? localStorage.getItem("oauth") : "";
+        window.login = localStorage.getItem("login") !== null ? localStorage.getItem("login") : "";
+        window.display_name = localStorage.getItem("display_name") !== null ? localStorage.getItem("display_name") : "";
 
         // 주소뒤 ?debug=true 로 디버그모드 활성화
         window.debugmode = getParams("debug") === "true";
@@ -158,7 +160,7 @@
         window.users = [];
         window.speechQueue = [];
         
-        if (window.oauth !== "") {
+        if (window.oauth !== "" && window.login !== "") {
             $(document).on('click', function() {
                 if(window.isclicked) return;
                 window.isclicked = true;
@@ -204,7 +206,24 @@
                         localStorage.setItem("oauth", oauth);
                         localStorage.setItem("state", "");
                         localStorage.setItem("last_url", "");
-                        location.href = last_url;
+                        fetch(
+                            'https://api.twitch.tv/helix/users',
+                            {
+                                "headers": {
+                                    "Client-ID": window.oauth_client_id,
+                                    "Authorization": "Bearer " + oauth
+                                }
+                            }
+                        )
+                        .then(function(response) {
+                            return response.json();
+                        })
+                        .then(function(result) {
+                            localStorage.setItem("login", result.login);
+                            localStorage.setItem("display_name", result.display_name);
+                            
+                            location.href = last_url;
+                        });
                     }
                 }
             } else {
@@ -214,13 +233,13 @@
                 localStorage.setItem("last_url", location.href);
 
                 document.body.innerHTML = '';
-                document.write("트위치로 로그인해야 사용하실수 있습니다. <a href=\"https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=" +
+                document.write("트위치로 로그인해야 사용하실수 있습니다.<br />2021년 2월 10일에 로그인하셨다면 로그인 방식 변경으로 다시 로그인하셔야 합니다.<br /><br /> <a href=\"https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=" +
                         window.oauth_client_id +
                         "&redirect_uri=" +
                         window.oauth_redirect_uri +
                         "&scope=chat_login%20channel_editor%20channel_commercial%20channel_check_subscription&state=" +
                         state +
-                        "\">로그인</a>");
+                        "\">트위치 아이디로 로그인</a>");
             }
         }
     </script>
