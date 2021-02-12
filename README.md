@@ -37,3 +37,8 @@ https://lastorder.xyz/chatreader-kor/speech.html
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FLastorder-DC%2Fchatreader-kor.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2FLastorder-DC%2Fchatreader-kor?ref=badge_large)
+
+### notifications.js / notifications.css
+MIT License
+
+See https://github.com/JamieLivingstone/styled-notifications/blob/master/LICENSE.md for details.
