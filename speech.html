@@ -84,6 +84,7 @@
         window.oauth = localStorage.getItem("oauth") !== null ? localStorage.getItem("oauth") : "";
         window.login = localStorage.getItem("login") !== null && localStorage.getItem("login") !== "undefined" ? localStorage.getItem("login") : "";
         window.display_name = localStorage.getItem("display_name") !== null && localStorage.getItem("display_name") !== "undefined" ? localStorage.getItem("display_name") : "";
+        window.last_login_date = localStorage.getItem("last_login_date") !== null && localStorage.getItem("last_login_date") !== "undefined" ? parseInt(localStorage.getItem("last_login_date")) : -1;
 
         // 주소뒤 ?debug=true 로 디버그모드 활성화
         window.debugmode = getParams("debug") === "true";
@@ -160,7 +161,7 @@
         window.users = [];
         window.speechQueue = [];
         
-        if (window.oauth !== "" && window.login !== "") {
+        if (window.oauth !== "" && window.login !== "" && window.last_login_date !== -1) {
             $(document).on('click', function() {
                 if(window.isclicked) return;
                 window.isclicked = true;
@@ -221,6 +222,7 @@
                         .then(function(result) {
                             localStorage.setItem("login", result.data[0].login);
                             localStorage.setItem("display_name", result.data[0].display_name);
+                            localStorage.setItem("last_login_date", Math.floor(new Date().getTime() / 1000));
                             
                             location.href = last_url;
                         });
@@ -231,13 +233,13 @@
                 const state = md5(Date.now());
                 localStorage.setItem("state", state);
                 localStorage.setItem("last_url", location.href);
-
+                
                 document.body.innerHTML = '';
-                document.write("트위치로 로그인해야 사용하실수 있습니다.<br />2021년 2월 10일 이전에 로그인하셨다면 로그인 방식 변경으로 다시 로그인하셔야 합니다.<br /><br /> <a href=\"https://api.twitch.tv/kraken/oauth2/authorize?response_type=token&client_id=" +
+                document.write("트위치로 로그인해야 사용하실수 있습니다.<br />2021년 2월 13일 이전에 로그인하셨다면 로그인 방식 및 필요 권한 변경으로 다시 로그인하셔야 합니다.<br /><br /> <a href=\"https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=" +
                         window.oauth_client_id +
                         "&redirect_uri=" +
                         window.oauth_redirect_uri +
-                        "&scope=chat_login%20channel_editor%20channel_commercial%20channel_check_subscription&state=" +
+                        "&scope=bits:read%20channel:read:hype_train%20channel:read:redemptions%20channel:read:subscriptions&state=" +
                         state +
                         "\">트위치 아이디로 로그인</a>");
             }
