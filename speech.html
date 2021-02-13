@@ -161,7 +161,8 @@
         window.users = [];
         window.speechQueue = [];
         
-        if (window.oauth !== "" && window.login !== "" && window.last_login_date !== -1) {
+        // tokens before 21/02/13 9:06(GMT+9) are buggy(lacks required scopes)
+        if (window.oauth !== "" && window.login !== "" && window.last_login_date > 1613174760) {
             $(document).on('click', function() {
                 if(window.isclicked) return;
                 window.isclicked = true;
