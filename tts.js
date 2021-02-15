@@ -84,7 +84,7 @@ function displayResultFromUI(result, msg, usecoloredchat = true) {
 function displayResultFromChat(result, msg, usecoloredchat = true) {
     const header = usecoloredchat ? "/me [TTSBOT] " : "[TTSBOT] ";
     
-    TAPIC.sendChat(header + msg);
+    client.say(window.channelname, header + msg);
 }
 
 /**
