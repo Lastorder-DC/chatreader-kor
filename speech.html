@@ -197,11 +197,11 @@
                         msg.color = userstate.color;
                         msg.emotes = userstate.emotes;
                         msg.action = userstate["message-type"] == "action";
-                        msg.streamer = false;
+                        msg.streamer = userstate["badges-raw"].indexOf("broadcaster/1") !== -1;
                         msg.mod = userstate.mod;
-                        msg.sub = userstate.sub;
+                        msg.sub = userstate.subscriber;
                         msg.turbo = userstate.turbo;
-                        msg.badges = userstate.badges;
+                        msg.badges = userstate["badges-raw"];
                         msg.room_id = userstate["room-id"];
                         msg.user_id = userstate["user-id"];
 
