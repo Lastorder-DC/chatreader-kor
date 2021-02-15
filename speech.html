@@ -57,6 +57,8 @@
         // ==================================
         const url_string = window.location.href;
         const url = new URL(url_string);
+        
+        let client = null;
 
         if ('speechSynthesis' in window) {
             console.debug("TTS check done");
@@ -172,7 +174,7 @@
                 if (window.channelname === "") {
                     location.href = url.origin + url.pathname + "?channel=" + window.login;
                 } else {
-                    const client = new tmi.Client({
+                    client = new tmi.Client({
                     options: { debug: true, messagesLogLevel: "info" },
                     connection: {
                         reconnect: true,
