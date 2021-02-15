@@ -187,28 +187,29 @@
                     client.on("connected", (address, port) => {
                         checkTTS();
                     });
+                    
+                    client.on("message", function(channel, userstate, message, self) {
+                        if (self) return;
+
+                        let msg = {}
+                        msg.from = userstate["display-name"];
+                        msg.text = message;
+                        msg.color = userstate.color;
+                        msg.emotes = userstate.emotes;
+                        msg.action = userstate["message-type"] == "action";
+                        msg.streamer = false;
+                        msg.mod = userstate.mod;
+                        msg.sub = userstate.sub;
+                        msg.turbo = userstate.turbo;
+                        msg.badges = userstate.badges;
+                        msg.room_id = userstate["room-id"];
+                        msg.user_id = userstate["user-id"];
+
+                        parseMessage(msg);
+                    });
+                    
                     client.connect().catch(console.error);
                 }
-                
-                client.on("message", function(channel, userstate, message, self) {
-                    if (self) return;
-                    
-                    let msg = {}
-                    msg.from = userstate["display-name"];
-                    msg.text = message;
-                    msg.color = userstate.color;
-                    msg.emotes = userstate.emotes;
-                    msg.action = userstate["message-type"] == "action";
-                    msg.streamer = false;
-                    msg.mod = userstate.mod;
-                    msg.sub = userstate.sub;
-                    msg.turbo = userstate.turbo;
-                    msg.badges = userstate.badges;
-                    msg.room_id = userstate["room-id"];
-                    msg.user_id = userstate["user-id"];
-
-                    parseMessage(msg);
-                });
             });
         } else {
             // there's no oauth key
