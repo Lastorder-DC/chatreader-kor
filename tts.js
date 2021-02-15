@@ -43,8 +43,8 @@ function change_channel() {
         if (result === "" || result == null) {
             location.reload()
         } else {
-            window.channelname = value;
-            location.href = url.origin + url.pathname + "?channel=" + value;
+            window.channelname = result;
+            location.href = url.origin + url.pathname + "?channel=" + result;
         }
     });
 }
