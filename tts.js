@@ -653,28 +653,17 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
                 };
 
                 msg.volume = window.volume / 100;
-
+                
+                // 구글 보이스 미사용시 초성 변환
+                if (google_kor === -1) msg = replaceChosung(msg);
+                
                 let obj = {};
                 obj.type = "default";
                 obj.msg = msg;
                 window.speechQueue.push(obj);
             }
         } else if (voicename === "polly") {
-            // 한글 초성 강제 변환
-            string = string.replace(/ㄱ/g, "기역");
-            string = string.replace(/ㄴ/g, "니은");
-            string = string.replace(/ㄷ/g, "디귿");
-            string = string.replace(/ㄹ/g, "리을");
-            string = string.replace(/ㅁ/g, "미음");
-            string = string.replace(/ㅂ/g, "비읍");
-            string = string.replace(/ㅅ/g, "시옷");
-            string = string.replace(/ㅇ/g, "이응");
-            string = string.replace(/ㅈ/g, "지읒");
-            string = string.replace(/ㅊ/g, "치읓");
-            string = string.replace(/ㅋ/g, "키읔");
-            string = string.replace(/ㅌ/g, "티읕");
-            string = string.replace(/ㅍ/g, "피읖");
-            string = string.replace(/ㅎ/g, "히읗");
+            string = replaceChosung(string);
             const obj = {};
             obj.type = "polly";
             obj.msg = '<speak><prosody rate="' + parseInt(speed * 100) + '%" pitch="' + parseInt(pitch * 100 - 100) + '%">' + string + '</prosody></speak>';
@@ -684,6 +673,25 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
 
         parseQueue();
     }
+}
+
+function replaceChosung(str) {
+    str = str.replace(/ㄱ/g, "기역");
+    str = str.replace(/ㄴ/g, "니은");
+    str = str.replace(/ㄷ/g, "디귿");
+    str = str.replace(/ㄹ/g, "리을");
+    str = str.replace(/ㅁ/g, "미음");
+    str = str.replace(/ㅂ/g, "비읍");
+    str = str.replace(/ㅅ/g, "시옷");
+    str = str.replace(/ㅇ/g, "이응");
+    str = str.replace(/ㅈ/g, "지읒");
+    str = str.replace(/ㅊ/g, "치읓");
+    str = str.replace(/ㅋ/g, "키읔");
+    str = str.replace(/ㅌ/g, "티읕");
+    str = str.replace(/ㅍ/g, "피읖");
+    str = str.replace(/ㅎ/g, "히읗");
+    
+    return str;
 }
 
 /**
