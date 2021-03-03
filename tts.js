@@ -655,7 +655,7 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
                 msg.volume = window.volume / 100;
                 
                 // 구글 보이스 미사용시 초성 변환
-                if (google_kor === -1) msg = replaceChosung(msg);
+                if (google_kor === -1) msg.text = replaceChosung(msg.text);
                 
                 let obj = {};
                 obj.type = "default";
