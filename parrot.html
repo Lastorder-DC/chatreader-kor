@@ -125,7 +125,7 @@
             };
             
             window.recognition.onresult = function(event) {
-                var resText = event.results[0][0].transcript; 
+                var resText = event.results[event.resultIndex][0].transcript; 
                 if(window.debugmode) console.log(event);
                 playText(resText,1,1,false,'인식결과');
             };
