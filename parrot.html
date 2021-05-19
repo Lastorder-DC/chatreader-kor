@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <title>채팅 읽어주는 로봇</title>
+    <meta charset="utf-8">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css" integrity="sha512-P5MgMn1jBN01asBgU0z60Qk4QxiXo86+wlFahKrsQf37c9cro517WzVSPPV1tDKzhku2iJ2FVgL67wG03SGnNA==" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="./notifications.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-sdk/2.840.0/aws-sdk.min.js" integrity="sha512-l299oP0ZZwuId6dh4uB/u5N4ZiMb1TSghnBfPLbRH8SDf4Z9Do73JY9FRbTW656STTe3gPDkV7jiUmsD++D4iA==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.bundle.min.js" integrity="sha512-wV7Yj1alIZDqZFCUQJy85VN+qvEIly93fIQAN7iqDFCPEucLCeNFz4r35FCo9s6WrpdDQPi80xbljXB8Bjtvcg==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js" integrity="sha512-RdSPYh1WA6BF0RhpisYJVYkOyTzK4HwofJ3Q7ivt/jkpW6Vc8AurL1R+4AUcvn9IwEKAPm/fk7qFZW3OuiUDeg==" crossorigin="anonymous"></script>
+    <script src="./notifications.js"></script>
+</head>
+<body>
+    <div id="divClick" style="display: block">활성화를 위해 마우스 클릭이 필요합니다.</div>
+    <div id="divContent" style="display: none;">
+        <div id="chat" style="overflow: hidden; word-wrap: break-word; width: 800px;">
+            <button type="button" class="btn btn-primary" onclick="startSTT()" id="btn-sttstart">음성 인식 시작</button>
+            <button type="button" class="btn btn-warning" onclick="endSTT()" id="btn-sttend" disabled>음성 인식 종료</button>
+            <button type="button" class="btn btn-danger" disabled="disabled" id="btn-cancel" onclick="window.speechQueue = [];window.kathy.ShutUp();window.speechSynthesis.cancel();playText('큐를 비웠습니다',1.3,1,false,'SYSTEM')">초기화중</button>
+            <div id="last_read" style="width:100%; height: 200px; overflow-y: scroll;"></div>
+        </div>
+        <form style="margin:10px">
+            <div class="form-group">
+                <label for="polly_access_id">아마존 액세스 아이디</label>
+                <input type="text" class="form-control" id="polly_access_id" placeholder="Amazon Access ID">
+            </div>
+            <div class="form-group">
+                <label for="polly_access_key">아마존 액세스 키</label>
+                <input type="text" class="form-control" id="polly_access_key" placeholder="Amazon Access Key">
+            </div>
+            <div class="form-group row">
+                <div class="offset-sm-2 col-sm-10">
+                    <button type="button" class="btn btn-primary" onclick="localStorage.setItem('polly_access_id', document.getElementById('polly_access_id').value);localStorage.setItem('polly_access_key', document.getElementById('polly_access_key').value);location.reload()">
+                        정보 저장
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        // ==================================
+        // !! 이 아래로는 수정하지 마세요! !!
+        // ==================================
+        const url_string = window.location.href;
+        const url = new URL(url_string);
+
+        if ('speechSynthesis' in window) {
+            console.debug("TTS check done");
+        } else {
+            location.href = "./no_tts.html";
+        }
+        
+        // 클릭 여부 저장
+        window.isclicked = false;
+        
+        // 주소뒤 ?debug=true 로 디버그모드 활성화
+        window.debugmode = getParams("debug") === "true";
+
+        // 초기화 성공 여부
+        window.initok = false;
+
+        speechSynthesis.cancel();
+
+        document.getElementById('polly_access_id').value = localStorage.getItem("polly_access_id");
+        document.getElementById('polly_access_key').value = localStorage.getItem("polly_access_key");
+        const awsCredentials = new AWS.Credentials(localStorage.getItem("polly_access_id"), localStorage.getItem("polly_access_key"));
+        const settings = {
+            awsCredentials: awsCredentials,
+            awsRegion: "us-west-2",
+            pollyVoiceId: "Seoyeon",
+            cacheSpeech: true
+        };
+
+        window.kathy = new ChattyKathy(settings);
+        window.users = [];
+        window.speechQueue = [];
+        
+        $(document).on('click', function() {
+            if(window.isclicked) return;
+            window.isclicked = true;
+            document.getElementById("divClick").style.display = "none";
+            document.getElementById("divContent").style.display = "block";
+            try { 
+                window.recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition || window.mozSpeechRecognition || window.msSpeechRecognition)(); 
+            } catch(e){ 
+                console.error(e);
+            }
+            window.recognition.lang = 'ko-KR';
+            window.recognition.interimResults = false; 
+            window.recognition.maxAlternatives = 5;
+            window.startBtn = document.getElementById("btn-sttstart");
+            window.endBtn = document.getElementById("btn-sttend");
+        });
+        
+        function startSTT(){ 
+            window.recognition.start(); 
+            isRecognizing = true;
+            window.recognition.onstart = function(){ 
+                window.startBtn.innerHTML = "음성 인식중"; 
+                window.startBtn.disabled = true;
+                window.endBtn.disabled = false;
+            };
+            
+            window.recognition.onspeechend = function(){ 
+                window.startBtn.innerHTML = "음성 인식 시작"; 
+                window.startBtn.disabled = false;
+                window.endBtn.disabled = true;
+            };
+            
+            window.recognition.onresult = function(event) {
+                var resText = event.results[0][0].transcript; 
+                if(window.debugmode) console.log(event);
+                playText(resText,1,1,false,'인식결과');
+            };
+            
+            window.recognition.onend = function(){ 
+                window.startBtn.innerHTML = "음성 인식 시작"; 
+                window.startBtn.disabled = false;
+                window.endBtn.disabled = true;
+                isRecognizing = false;
+            } 
+        }
+        
+        function endSTT(){ 
+            window.recognition.stop(); 
+            window.startBtn.innerHTML = "음성 인식 시작"; 
+            window.startBtn.disabled = false;
+            window.endBtn.disabled = true;
+            isRecognizing = false; 
+        }
+    </script>
+</body>
+</html>
