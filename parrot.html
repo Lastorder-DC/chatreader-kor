@@ -19,8 +19,7 @@
     <div id="divContent" style="display: none;">
         <div id="chat" style="overflow: hidden; word-wrap: break-word; width: 800px;">
             <button type="button" class="btn btn-primary" onclick="startSTT()" id="btn-sttstart">음성 인식 시작</button>
-            <button type="button" class="btn btn-warning" onclick="endSTT()" id="btn-sttend" disabled>음성 인식 종료</button>
-            <button type="button" class="btn btn-danger" disabled="disabled" id="btn-cancel" onclick="window.speechQueue = [];window.kathy.ShutUp();window.speechSynthesis.cancel();playText('큐를 비웠습니다',1.3,1,false,'SYSTEM')">초기화중</button><br />
+            <button type="button" class="btn btn-warning" onclick="endSTT()" id="btn-sttend" disabled>음성 인식 종료</button><br />
             <input type="checkbox" id="chk-keepstt" onclick="localStorage.setItem('keepstt', this.checked ? 'true' : 'false');window.keepstt = !this.checked;window.recognition.continuous = this.checked" /> 연속 인식 켜기
             <div id="last_read" style="width:100%; height: 200px; overflow-y: scroll;"></div>
         </div>
