@@ -64,10 +64,10 @@
         window.initok = false;
         
         // 읽을 채팅 음량 (!!tts volume (음량)으로 변경가능)
-        window.volume = localStorage.getItem("tts_volume") !== null ? parseInt(localStorage.getItem("tts_volume")) : 100;
+        window.volume = localStorage.getItem("parrot_tts_volume") !== null ? parseInt(localStorage.getItem("parrot_tts_volume")) : 100;
         
         // 기본 보이스
-        window.def_voice = localStorage.getItem("def_voice") !== null ? localStorage.getItem("def_voice") : "default";
+        window.def_voice = localStorage.getItem("parrot_def_voice") !== null ? localStorage.getItem("parrot_def_voice") : "default";
 
         speechSynthesis.cancel();
 
