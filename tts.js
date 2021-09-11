@@ -669,6 +669,10 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
             obj.msg = '<speak><prosody rate="' + parseInt(speed * 100) + '%" pitch="' + parseInt(pitch * 100 - 100) + '%">' + string + '</prosody></speak>';
             obj.volume = window.volume / 100;
             window.speechQueue.push(obj);
+            
+            if (typeof nickname == "undefined" || nickname === "") nickname = "Unknown";
+            if (banable && nickname !== "SYSTEM") document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='cursor: pointer;' onclick='banUser(\"" + nickname + "\", displayResultFromUI)'></i>&nbsp;<b>" + nickname + "</b>:" + string + "<br />\n";
+            else document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='color: #666' onclick='return false;'></i>&nbsp;<b>" + nickname + "</b>:" + string + "<br />\n";
         }
 
         parseQueue();
