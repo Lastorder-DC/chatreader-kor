@@ -793,3 +793,25 @@ function parseQueue() {
 
     setTimeout(parseQueue, 100);
 }
+
+/**
+ * 언어 선택 함수
+ */
+function setLanguage(language, status) {
+    if(window.languagelist.indexOf(language) === -1) {
+        window.languagelist.push(language);
+        document.getElementById("chk-enable-" + language).checked = true;
+        document.getElementById("ord-" + language).innerText = window.curOrd++;
+    } else {
+        window.languagelist.splice(window.languagelist.indexOf(language), 1);
+        document.getElementById("chk-enable-" + language).checked = false;
+        document.getElementById("ord-" + language).innerText = '비활성화';
+        window.curOrd = 1;
+        for(idx in window.languagelist) {
+            document.getElementById("chk-enable-" + window.languagelist[idx]).checked = true;
+            document.getElementById("ord-" + window.languagelist[idx]).innerText = window.curOrd++;
+        }
+    }
+    
+    localStorage.setItem("languagelist", JSON.stringify(window.languagelist));
+}
