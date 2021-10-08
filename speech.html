@@ -26,9 +26,9 @@
             <button type="button" class="btn btn-success" onclick="window.change_channel();" id="btn-channel">채널 변경</button><br />
             <input type="checkbox" id="chk-autoscroll" onclick="localStorage.setItem('autoscroll', this.checked ? 'true' : 'false');window.stopScroll = !this.checked;if(!window.stopScroll) scrollBottom();" /> 자동 스크롤 켜기<br />
             활성화된 언어<br />
-            <input type="checkbox" id="chk-enable-kor" onclick="setLanguage('kor', this.checked)" /> 한국어(우선순위 : <span id="ord-kor">0</span>
-            <input type="checkbox" id="chk-enable-jpn" onclick="setLanguage('jpn', this.checked)" /> 일본어(우선순위 : <span id="ord-jpn">0</span>
-            <input type="checkbox" id="chk-enable-chn" onclick="setLanguage('chn', this.checked)" /> 중국어(우선순위 : <span id="ord-chn">0</span><br />
+            <input type="checkbox" id="chk-enable-kor" onclick="setLanguage('kor', this.checked)" /> 한국어(우선순위 : <span id="ord-kor">비활성화</span>)
+            <input type="checkbox" id="chk-enable-jpn" onclick="setLanguage('jpn', this.checked)" /> 일본어(우선순위 : <span id="ord-jpn">비활성화</span>)
+            <input type="checkbox" id="chk-enable-chn" onclick="setLanguage('chn', this.checked)" /> 중국어(우선순위 : <span id="ord-chn">비활성화</span>)<br />
             <div id="last_read" style="width:100%; height: 200px; overflow-y: scroll;"></div>
         </div>
         <form style="margin:10px">
@@ -113,6 +113,14 @@
 
         // 기본적으로 밴할 키워드
         window.bankeyword = window.bankeyword.concat(['섹스']);
+        
+        // 언어 순서 설정
+        window.languagelist = localStorage.getItem("languagelist") !== null ? JSON.parse(localStorage.getItem("languagelist")) : ["kor","jpn"];
+        window.curOrd = 1;
+        for(idx in window.languagelist) {
+            document.getElementById("chk-enable-" + window.languagelist[idx]).checked = true;
+            document.getElementById("ord-" + window.languagelist[idx]).innerText = window.curOrd++;
+        }
         
         // 각 리스트 모두 중복 제거
         if(window.banlist.length != 0) {
