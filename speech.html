@@ -24,8 +24,8 @@
             <button type="button" class="btn btn-secondary" onclick="document.getElementById('last_read').innerHTML = '';" id="btn-clearlog">로그 비움</button>
             <button type="button" class="btn btn-warning" onclick="localStorage.setItem('oauth','');location.reload();" id="btn-logout">로그아웃</button>
             <button type="button" class="btn btn-success" onclick="window.change_channel();" id="btn-channel">채널 변경</button><br />
-            <input type="checkbox" id="chk-autoscroll" onclick="localStorage.setItem('autoscroll', this.checked ? 'true' : 'false');window.stopScroll = !this.checked;if(!window.stopScroll) scrollBottom();" /> 자동 스크롤 켜기<br />
-            활성화된 언어<br />
+            <input type="checkbox" id="chk-autoscroll" onclick="localStorage.setItem('autoscroll', this.checked ? 'true' : 'false');window.stopScroll = !this.checked;if(!window.stopScroll) scrollBottom();" /> 자동 스크롤 켜기<br /><br />
+            <h5>활성화된 언어</h5>
             <input type="checkbox" id="chk-enable-kor" onclick="setLanguage('kor', this.checked)" /> 한국어(우선순위 : <span id="ord-kor">비활성화</span>)
             <input type="checkbox" id="chk-enable-jpn" onclick="setLanguage('jpn', this.checked)" /> 일본어(우선순위 : <span id="ord-jpn">비활성화</span>)
             <input type="checkbox" id="chk-enable-chn" onclick="setLanguage('chn', this.checked)" /> 중국어(우선순위 : <span id="ord-chn">비활성화</span>)<br />
