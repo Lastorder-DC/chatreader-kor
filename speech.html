@@ -173,8 +173,8 @@
         window.users = [];
         window.speechQueue = [];
         
-        // tokens before 21/02/13 9:06(GMT+9) are buggy(lacks required scopes)
-        if (window.oauth !== "" && window.login !== "" && window.last_login_date > 1613174760) {
+        // tokens before 21/10/7 00:00(GMT+9) are invalid due to twitch hacking
+        if (window.oauth !== "" && window.login !== "" && window.last_login_date > 1633532400) {
             $(document).on('click', function() {
                 if(window.isclicked) return;
                 window.isclicked = true;
