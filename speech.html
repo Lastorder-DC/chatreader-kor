@@ -8,11 +8,11 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="./notifications.css?v=20210911" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-sdk/2.840.0/aws-sdk.min.js" integrity="sha512-l299oP0ZZwuId6dh4uB/u5N4ZiMb1TSghnBfPLbRH8SDf4Z9Do73JY9FRbTW656STTe3gPDkV7jiUmsD++D4iA==" crossorigin="anonymous"></script>
-    <script src="https://rawcdn.githack.com/Lastorder-DC/tapic/5.1.3/dist/tapic.min.js"></script>
     <script src="https://rawcdn.githack.com/blueimp/JavaScript-MD5/v2.10.0/js/md5.min.js"></script>
     <script src="./ChattyKathy.js?v=20210911"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.bundle.min.js" integrity="sha512-wV7Yj1alIZDqZFCUQJy85VN+qvEIly93fIQAN7iqDFCPEucLCeNFz4r35FCo9s6WrpdDQPi80xbljXB8Bjtvcg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js" integrity="sha512-RdSPYh1WA6BF0RhpisYJVYkOyTzK4HwofJ3Q7ivt/jkpW6Vc8AurL1R+4AUcvn9IwEKAPm/fk7qFZW3OuiUDeg==" crossorigin="anonymous"></script>
+    <script src="./tmi.min.js?v=20220302-renewal"></script>
     <script src="./notifications.js?v=20210911"></script>
     <script src="./tts.js?v=20210911"></script>
 </head>
@@ -61,6 +61,8 @@
         // ==================================
         const url_string = window.location.href;
         const url = new URL(url_string);
+        
+        let client = null;
 
         if ('speechSynthesis' in window) {
             console.debug("TTS check done");
@@ -180,22 +182,48 @@
                 window.isclicked = true;
                 document.getElementById("divClick").style.display = "none";
                 document.getElementById("divContent").style.display = "block";
+                
+                if (window.channelname === "") {
+                    location.href = url.origin + url.pathname + "?channel=" + window.login;
+                } else {
+                    client = new tmi.Client({
+                    options: { debug: true, messagesLogLevel: "info", clientId: window.oauth_client_id },
+                    connection: {
+                        reconnect: true,
+                        secure: true
+                    },
+                    identity: {
+                        username: window.login,
+                        password: window.oauth
+                    },
+                    channels: [ window.channelname ]});
+                    
+                    client.on("connected", (address, port) => {
+                        checkTTS();
+                    });
+                    
+                    client.on("message", function(channel, userstate, message, self) {
+                        if (self) return;
 
-                TAPIC.setup(window.oauth, function (username) {
-                    TAPIC.setRefreshRate(10);
+                        let msg = {}
+                        msg.from = userstate["display-name"];
+                        msg.text = message;
+                        msg.color = userstate.color;
+                        if(userstate.emotes !== null) msg.emotes = userstate.emotes;
+                        msg.action = userstate["message-type"] == "action";
+                        msg.streamer = userstate["badges-raw"].indexOf("broadcaster/1") !== -1;
+                        msg.mod = userstate.mod;
+                        msg.sub = userstate.subscriber;
+                        msg.turbo = userstate.turbo;
+                        msg.badges = userstate["badges-raw"];
+                        msg.room_id = userstate["room-id"];
+                        msg.user_id = userstate["user-id"];
 
-                    if (window.channelname === "") {
-                        location.href = url.origin + url.pathname + "?channel=" + username;
-                    } else {
-                        TAPIC.joinChannel(window.channelname, function () {
-                            checkTTS();
-                        });
-                    }
-                });
-
-                TAPIC.listen('message', function (e) {
-                    parseMessage(e);
-                });
+                        parseMessage(msg);
+                    });
+                    
+                    client.connect().catch(console.error);
+                }
             });
         } else {
             // there's no oauth key
