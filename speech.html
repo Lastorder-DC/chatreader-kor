@@ -6,15 +6,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/css/bootstrap.min.css" integrity="sha512-P5MgMn1jBN01asBgU0z60Qk4QxiXo86+wlFahKrsQf37c9cro517WzVSPPV1tDKzhku2iJ2FVgL67wG03SGnNA==" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/xeicon@2.3.3/xeicon.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
-    <link rel="stylesheet" href="./notifications.css" />
+    <link rel="stylesheet" href="./notifications.css?v=20210911" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aws-sdk/2.840.0/aws-sdk.min.js" integrity="sha512-l299oP0ZZwuId6dh4uB/u5N4ZiMb1TSghnBfPLbRH8SDf4Z9Do73JY9FRbTW656STTe3gPDkV7jiUmsD++D4iA==" crossorigin="anonymous"></script>
     <script src="https://rawcdn.githack.com/blueimp/JavaScript-MD5/v2.10.0/js/md5.min.js"></script>
-    <script src="https://chattykathy.lastorder.tk/ChattyKathy.js"></script>
+    <script src="./ChattyKathy.js?v=20210911"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.bundle.min.js" integrity="sha512-wV7Yj1alIZDqZFCUQJy85VN+qvEIly93fIQAN7iqDFCPEucLCeNFz4r35FCo9s6WrpdDQPi80xbljXB8Bjtvcg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js" integrity="sha512-RdSPYh1WA6BF0RhpisYJVYkOyTzK4HwofJ3Q7ivt/jkpW6Vc8AurL1R+4AUcvn9IwEKAPm/fk7qFZW3OuiUDeg==" crossorigin="anonymous"></script>
-    <script src="./tmi.min.js"></script>
-    <script src="./notifications.js"></script>
-    <script src="./tts.js"></script>
+    <script src="./tmi.min.js?v=20220302"></script>
+    <script src="./notifications.js?v=20210911"></script>
+    <script src="./tts.js?v=20210911"></script>
 </head>
 <body>
     <div id="divClick" style="display: block">활성화를 위해 마우스 클릭이 필요합니다.</div>
@@ -24,7 +24,11 @@
             <button type="button" class="btn btn-secondary" onclick="document.getElementById('last_read').innerHTML = '';" id="btn-clearlog">로그 비움</button>
             <button type="button" class="btn btn-warning" onclick="localStorage.setItem('oauth','');location.reload();" id="btn-logout">로그아웃</button>
             <button type="button" class="btn btn-success" onclick="window.change_channel();" id="btn-channel">채널 변경</button><br />
-            <input type="checkbox" id="chk-autoscroll" onclick="localStorage.setItem('autoscroll', this.checked ? 'true' : 'false');window.stopScroll = !this.checked;if(!window.stopScroll) scrollBottom();" /> 자동 스크롤 켜기
+            <input type="checkbox" id="chk-autoscroll" onclick="localStorage.setItem('autoscroll', this.checked ? 'true' : 'false');window.stopScroll = !this.checked;if(!window.stopScroll) scrollBottom();" /> 자동 스크롤 켜기<br /><br />
+            <h5>활성화된 언어</h5>
+            <input type="checkbox" id="chk-enable-kor" onclick="setLanguage('kor', this.checked)" /> 한국어(우선순위 : <span id="ord-kor">비활성화</span>)
+            <input type="checkbox" id="chk-enable-jpn" onclick="setLanguage('jpn', this.checked)" /> 일본어(우선순위 : <span id="ord-jpn">비활성화</span>)
+            <input type="checkbox" id="chk-enable-chn" onclick="setLanguage('chn', this.checked)" /> 중국어(우선순위 : <span id="ord-chn">비활성화</span>)<br />
             <div id="last_read" style="width:100%; height: 200px; overflow-y: scroll;"></div>
         </div>
         <form style="margin:10px">
@@ -112,6 +116,14 @@
         // 기본적으로 밴할 키워드
         window.bankeyword = window.bankeyword.concat(['섹스']);
         
+        // 언어 순서 설정
+        window.languagelist = localStorage.getItem("languagelist") !== null ? JSON.parse(localStorage.getItem("languagelist")) : ["kor","jpn"];
+        window.curOrd = 1;
+        for(idx in window.languagelist) {
+            document.getElementById("chk-enable-" + window.languagelist[idx]).checked = true;
+            document.getElementById("ord-" + window.languagelist[idx]).innerText = window.curOrd++;
+        }
+        
         // 각 리스트 모두 중복 제거
         if(window.banlist.length != 0) {
             window.banlist = window.banlist.filter(function(item, pos) {
@@ -163,8 +175,8 @@
         window.users = [];
         window.speechQueue = [];
         
-        // tokens before 21/02/13 9:06(GMT+9) are buggy(lacks required scopes)
-        if (window.oauth !== "" && window.login !== "" && window.last_login_date > 1613174760) {
+        // tokens before 21/10/7 00:00(GMT+9) are invalid due to twitch hacking
+        if (window.oauth !== "" && window.login !== "" && window.last_login_date > 1633532400) {
             $(document).on('click', function() {
                 if(window.isclicked) return;
                 window.isclicked = true;
@@ -264,7 +276,7 @@
                 localStorage.setItem("last_url", location.href);
                 
                 document.body.innerHTML = '';
-                document.write("트위치로 로그인해야 사용하실수 있습니다.<br />2021년 2월 13일 이전에 로그인하셨다면 로그인 방식 및 필요 권한 변경으로 다시 로그인하셔야 합니다.<br /><br /> <a href=\"https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=" +
+                document.write("트위치로 로그인해야 사용하실수 있습니다.<br />2021년 10월 7일 이전에 로그인하셨다면 트위치 해킹으로 인해 키가 유출되었을 가능성이 있어 재로그인하셔야 합니다.<br /><br /> <a href=\"https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=" +
                         window.oauth_client_id +
                         "&redirect_uri=" +
                         window.oauth_redirect_uri +

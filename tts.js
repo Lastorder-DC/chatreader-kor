@@ -330,7 +330,6 @@ function addKeyword(keyword, callback) {
  */
 function checkTTS() {
     if ('speechSynthesis' in window) {
-        window.korSupport = false;
         window.utterances = [];
 
         const msg = new SpeechSynthesisUtterance(window.channelname + " 채널에 연결되었습니다.");
@@ -354,15 +353,7 @@ function checkTTS() {
             if (voices.length === 0) {
                 alert("사용 가능한 TTS DB 없음");
             } else {
-                speechSynthesis.getVoices().forEach(function (voice) {
-                    if (voice.lang === "ko_KR" || voice.lang === "ko-KR" || voice.lang === "kr" || voice.lang === "ko") window.korSupport = true;
-                });
-
-                if (!window.korSupport) {
-                    alert("한글 미지원으로 사용 불가능");
-                } else {
-                    window.initok = true;
-                }
+                window.initok = true;
             }
 
             document.getElementById("btn-cancel").disabled = false;
@@ -603,65 +594,89 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
 
     if ('speechSynthesis' in window) {
         let i = 0;
-        let google_kor = -1;
-        let google_jpn = -1;
-        const check = /[ㄱ-ㅎㅏ-ㅣ가-힣]/;
-        const check_jp = /[\u3040-\u30ff\u31f0-\u31ff]/;
+        let voiceIdx = -1;
+        let voiceLang = "en-US";
+        let detectedLanguage = "none";
+        const check = [];
+        check['kor'] = /[ㄱ-ㅎㅏ-ㅣ가-힣]/;
+        check['jpn'] = /[\u3040-\u30ff\u31f0-\u31ff]/;
+        check['chn'] = /\p{Script=Han}/u;
+        
+        for(idx in window.languagelist) {
+            if(window.languagelist[idx] == "kor" && check["kor"].test(string)) {
+                detectedLanguage = "kor";
+                break;
+            } else if(window.languagelist[idx] == "jpn" && (check["jpn"].test(string) || check["chn"].test(string))) {
+                detectedLanguage = "jpn";
+                break;
+            } else if(window.languagelist[idx] == "chn" && check["chn"].test(string)) {
+                detectedLanguage = "chn";
+                break;
+            }
+        }
 
         if (typeof voicename === 'undefined') voicename = "default";
 
         if (voicename === "default") {
             speechSynthesis.getVoices().forEach(function (voice) {
-                if (check.test(string)) {
-                    if (voice.lang === "ko_KR" || voice.lang === "ko-KR" || voice.lang === "kr" || voice.lang === "ko") window.korSupport = true;
+                if (detectedLanguage == "kor") {
                     if (voice.lang === "ko-KR" && voice.name.indexOf("Google") !== -1) {
-                        google_kor = i;
+                        voiceLang = "ko-KR";
+                        voiceIdx = i;
                     }
-                } else if (check_jp.test(string)) {
-                    if (voice.lang === "ja_JP" || voice.lang === "ja-JP" || voice.lang === "jp" || voice.lang === "ja") window.jpnSupport = true;
+                } else if (detectedLanguage == "jpn") {
                     if (voice.lang === "ja-JP" && voice.name.indexOf("Google") !== -1) {
-                        google_jpn = i;
+                        voiceLang = "ja-JP";
+                        voiceIdx = i;
+                    }
+                } else if (detectedLanguage == "chn") {
+                    if (voice.lang === "zh-CN" && voice.name.indexOf("Google") !== -1) {
+                        voiceLang = "zh-CN";
+                        voiceIdx = i;
                     }
                 } else {
                     if (voice.lang === "en-US" && voice.name.indexOf("Google") !== -1) {
-                        google_kor = i;
+                        voiceIdx = i;
                     }
                 }
 
                 i++;
             });
+            
+            // TTS를 위한 객체 초기화(언어, 목소리 등 정보 포함)
+            const msg = new SpeechSynthesisUtterance(string);
+            
+            // 인식된 언어로 설정한다
+            if (voiceLang != "en-US") msg.lang = voiceLang;
+            if (voiceIdx !== -1) msg.voice = speechSynthesis.getVoices()[voiceIdx];
+            
+            // 이외 나머지 값 설정
+            msg.from = nickname;
+            msg.rate = speed;
+            msg.pitch = pitch;
+            
+            // 읽기 시작시 채팅 로그에 추가
+            msg.onstart = function (event) {
+                if (typeof event.utterance.from == "undefined" || event.utterance.from === "") event.utterance.from = "Unknown";
+                if (banable && event.utterance.from !== "SYSTEM") document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='cursor: pointer;' onclick='banUser(\"" + event.utterance.from + "\", displayResultFromUI)'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
+                else document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='color: #666' onclick='return false;'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
+            };
+            
+            // 읽기 종료(일단은 로그 이외 아무것도 하지 않는다)
+            msg.onend = function (event) {
+                if (window.debugmode) console.log("msg read event");
+                if (window.debugmode) console.log(event);
+            };
 
-            if (window.korSupport || ignoreKor) {
-                const msg = new SpeechSynthesisUtterance(string);
+            msg.volume = window.volume / 100;
 
-                if (check.test(string)) msg.lang = "ko-KR";
-                else if (check_jp.test(string)) msg.lang = "ja-JP";
-                else msg.lang = "en-US";
-                msg.from = nickname;
-                if (google_kor !== -1) msg.voice = speechSynthesis.getVoices()[google_kor];
-                else if (google_jpn !== -1) msg.voice = speechSynthesis.getVoices()[google_jpn];
-                msg.rate = speed;
-                msg.pitch = pitch;
-                msg.onstart = function (event) {
-                    if (typeof event.utterance.from == "undefined" || event.utterance.from === "") event.utterance.from = "Unknown";
-                    if (banable && event.utterance.from !== "SYSTEM") document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='cursor: pointer;' onclick='banUser(\"" + event.utterance.from + "\", displayResultFromUI)'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
-                    else document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='color: #666' onclick='return false;'></i>&nbsp;<b>" + event.utterance.from + "</b>:" + event.utterance.text + "<br />\n";
-                };
-                msg.onend = function (event) {
-                    if (window.debugmode) console.log("msg read event");
-                    if (window.debugmode) console.log(event);
-                };
+            // 구글 보이스 미사용시 초성 변환
+            if (voiceIdx === -1) msg.text = replaceChosung(msg.text);
 
-                msg.volume = window.volume / 100;
-                
-                // 구글 보이스 미사용시 초성 변환
-                if (google_kor === -1) msg.text = replaceChosung(msg.text);
-                
-                let obj = {};
-                obj.type = "default";
-                obj.msg = msg;
-                window.speechQueue.push(obj);
-            }
+            let obj = {};
+            obj.type = "default";
+            obj.msg = msg;
+            window.speechQueue.push(obj);
         } else if (voicename === "polly") {
             string = replaceChosung(string);
             const obj = {};
@@ -669,6 +684,10 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
             obj.msg = '<speak><prosody rate="' + parseInt(speed * 100) + '%" pitch="' + parseInt(pitch * 100 - 100) + '%">' + string + '</prosody></speak>';
             obj.volume = window.volume / 100;
             window.speechQueue.push(obj);
+            
+            if (typeof nickname == "undefined" || nickname === "") nickname = "Unknown";
+            if (banable && nickname !== "SYSTEM") document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='cursor: pointer;' onclick='banUser(\"" + nickname + "\", displayResultFromUI)'></i>&nbsp;<b>" + nickname + "</b>:" + string + "<br />\n";
+            else document.getElementById("last_read").innerHTML += "<i class='xi-ban' style='color: #666' onclick='return false;'></i>&nbsp;<b>" + nickname + "</b>:" + string + "<br />\n";
         }
 
         parseQueue();
@@ -788,4 +807,26 @@ function parseQueue() {
     }
 
     setTimeout(parseQueue, 100);
+}
+
+/**
+ * 언어 선택 함수
+ */
+function setLanguage(language, status) {
+    if(window.languagelist.indexOf(language) === -1) {
+        window.languagelist.push(language);
+        document.getElementById("chk-enable-" + language).checked = true;
+        document.getElementById("ord-" + language).innerText = window.curOrd++;
+    } else {
+        window.languagelist.splice(window.languagelist.indexOf(language), 1);
+        document.getElementById("chk-enable-" + language).checked = false;
+        document.getElementById("ord-" + language).innerText = '비활성화';
+        window.curOrd = 1;
+        for(idx in window.languagelist) {
+            document.getElementById("chk-enable-" + window.languagelist[idx]).checked = true;
+            document.getElementById("ord-" + window.languagelist[idx]).innerText = window.curOrd++;
+        }
+    }
+    
+    localStorage.setItem("languagelist", JSON.stringify(window.languagelist));
 }
