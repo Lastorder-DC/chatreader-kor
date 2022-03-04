@@ -3,8 +3,6 @@
 
 트위치용 TTS 봇입니다. 시청자들의 채팅을 TTS로 읽어 줍니다.
 
-<a href="https://donaricano.com/mypage/1686218426_TaDxJ6" target="_blank"><img src="https://d1u4yishnma8v5.cloudfront.net/donarincano_gift.png" alt="donaricano-btn" style="height: 70px !important;width: 200px !important;" /></a>
-
 ## 사용하는 권한 알림
 - 채팅 보내기 : TTSBOT 명령어 피드백에 사용합니다.
 - 후원 열차 데이터 보기 : 후원 열차 관련 TTS 알림시 사용 예정입니다.
