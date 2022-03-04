@@ -211,7 +211,7 @@
                         msg.color = userstate.color;
                         if(userstate.emotes !== null) msg.emotes = userstate.emotes;
                         msg.action = userstate["message-type"] == "action";
-                        msg.badges = userstate["badges-raw"] ?? [];
+                        msg.badges = userstate["badges-raw"] ?? "";
                         msg.streamer = msg.badges.indexOf("broadcaster/1") !== -1;
                         msg.mod = userstate.mod;
                         msg.sub = userstate.subscriber;
