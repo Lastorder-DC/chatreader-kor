@@ -1,9 +1,7 @@
 # 채팅 읽어주는 로봇
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2FLastorder-DC%2Fchatreader-kor.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2FLastorder-DC%2Fchatreader-kor?ref=badge_shield)
 
-트위치용 TTS 봇입니다. 시청자들의 채팅을 TTS로 읽어 줍니다.
-
-<a href="https://donaricano.com/mypage/1686218426_TaDxJ6" target="_blank"><img src="https://d1u4yishnma8v5.cloudfront.net/donarincano_gift.png" alt="donaricano-btn" style="height: 70px !important;width: 200px !important;" /></a>
+트위치용 TTS 봇입니다. 시청자들의 채팅을 TTS로 읽어 줍니다. [개발자에게 후원하기](https://toon.at/donate/636429745622936823)
 
 ## 사용하는 권한 알림
 - 채팅 보내기 : TTSBOT 명령어 피드백에 사용합니다.
