@@ -204,6 +204,7 @@
                     
                     client.on("message", function(channel, userstate, message, self) {
                         if (self) return;
+                        if (userstate["message-type"] !== "chat") return;
 
                         let msg = {}
                         msg.from = userstate["display-name"];
