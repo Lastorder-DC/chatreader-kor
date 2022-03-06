@@ -203,8 +203,8 @@
                     });
                     
                     client.on("message", function(channel, userstate, message, self) {
-                        if (self) return;
-                        if (userstate["message-type"] !== "chat") return;
+                        // 봇 자신의 메세지 혹은 채팅이 아닌 메세지는 무시
+                        if (self || userstate["message-type"] !== "chat") return;
 
                         let msg = {}
                         msg.from = userstate["display-name"];
