@@ -209,7 +209,7 @@
                         msg.from = userstate["display-name"];
                         msg.text = message;
                         msg.color = userstate.color;
-                        if(userstate.emotes !== null) msg.emotes = userstate.emotes;
+                        if(userstate['emotes-raw'] !== null) msg.emotes = userstate['emotes-raw'];
                         msg.action = userstate["message-type"] == "action";
                         msg.badges = userstate["badges-raw"] ?? [];
                         msg.streamer = msg.badges.indexOf("broadcaster/1") !== -1;
