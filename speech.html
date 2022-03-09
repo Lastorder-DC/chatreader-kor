@@ -14,7 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js" integrity="sha512-RdSPYh1WA6BF0RhpisYJVYkOyTzK4HwofJ3Q7ivt/jkpW6Vc8AurL1R+4AUcvn9IwEKAPm/fk7qFZW3OuiUDeg==" crossorigin="anonymous"></script>
     <script src="./tmi.min.js?v=20220302-renewal2"></script>
     <script src="./notifications.js?v=20210911"></script>
-    <script src="./tts.js?v=20210911"></script>
+    <script src="./tts.js?v=20220309"></script>
 </head>
 <body>
     <div id="divClick" style="display: block">활성화를 위해 마우스 클릭이 필요합니다.</div>
@@ -146,6 +146,9 @@
 
         // 개설자 전용
         window.tts_founderonly = localStorage.getItem("tts_founderonly") === "true";
+        
+        // 시청자 전용(스트리머만 제외)
+        window.tts_vieweronly = localStorage.getItem("tts_vieweronly") === "true";
 
         // 보이스 개인화 설정
         window.uniq_voice = localStorage.getItem("uniq_voice") !== "false";
