@@ -39,6 +39,7 @@ https://lastorder.xyz/chatreader-kor/speech.html
 | volume      | 최대 볼륨        | TTS 볼륨을 설정합니다. 1에서 100사이 값으로 지정하실수 있습니다.                                                | !!tts volume 80           |
 | subonly     | on, off         | 구독자 전용 채팅 모드를 활성화/비활성화 합니다. 활성화시 구독하지 않은 시청자의 채팅은 읽지 않습니다.               | !!tts subonly on          |
 | founderonly | on, off         | 개설자 전용 채팅 모드를 활성화/비활성화 합니다. 활성화시 구독자 중 개설자 뱃지가 없는 시청자의 채팅은 읽지 않습니다. | !!tts founderonly on      |
+| vieweronly  | on, off         | 시청자 전용 채팅 모드를 활성화/비활성화 합니다. 활성화시 스트리머 제외 시청자의 채팅만 읽습니다.                    | !!tts vieweronly on       |
 | uniq        | on, off         | TTS 보이스 개인화 설정을 활성화/비활성화 합니다. 활성화시 닉네임에 따라 피치/속도가 바뀝니다. (기본 활성화)         | !!tts uniq off            |
 | voice       | default, polly  | 기본 TTS 설정을 변경합니다. polly의 경우 설정이 되어 있지 않을시 동작하지 않습니다.                               | !!tts voice polly         |
 
