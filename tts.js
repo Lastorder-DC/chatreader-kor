@@ -566,7 +566,7 @@ function parseChat(e) {
         message = replaceTwitchEmoticon(message, e.emotes);
         if (message !== "") {
             // 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
-            if (((e.mod && index === -1) || (!window.tts_vieweronly && (e.streamer || e.badges.indexOf("broadcaster/1") !== -1)) && message.length < 120) {
+            if ((e.mod && index === -1) || (!window.tts_vieweronly && (e.streamer || e.badges.indexOf("broadcaster/1") !== -1)) && message.length < 120) {
                 playText(message, personality_speed, personality_pitch, false, e.from, voicename, (!e.streamer && e.badges.indexOf("broadcaster/1") === -1));
             } else {
                 // 화이트리스트 사용시 화이트리스트에 있는 아이디 + 밴리스트에 없는 아이디 + 채팅 길이가 지정된 길이 미만
