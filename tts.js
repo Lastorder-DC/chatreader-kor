@@ -179,6 +179,24 @@ function setFounderOnly(mode, callback) {
 }
 
 /**
+ * 시청자 전용 모드 설정
+ * @param {String} mode 켜기/끄기 여부
+ * @param {Function} callback 실행 결과 콜백
+ */
+function setViewerOnly(mode, callback) {
+    if (mode === "on" || mode === "true" || mode === "enable") {
+        window.tts_vieweronly = true;
+        localStorage.setItem("tts_vieweronly", "true");
+        callback(true, "시청자 전용 TTS 모드가 활성화되었습니다.");
+    }
+    if (mode === "off" || mode === "false" || mode === "disable") {
+        window.tts_vieweronly = false;
+        localStorage.setItem("tts_vieweronly", "false");
+        callback(true, "시청자 전용 TTS 모드가 비활성화되었습니다.");
+    }
+}
+
+/**
  * TTS 개인화 활성화 여부 설정
  * @param {String} mode 켜기/끄기 여부
  * @param {Function} callback 실행 결과 콜백
@@ -390,6 +408,11 @@ function parseCmd(e) {
             setFounderOnly(command, displayResultFromChat);
         }
 
+        if (command.indexOf("vieweronly ") !== -1) {
+            command = command.replace("vieweronly ", "");
+            setViewerOnly(command, displayResultFromChat);
+        }
+
         if (command.indexOf("uniq ") !== -1) {
             command = command.replace("uniq ", "");
             setUniq(command, displayResultFromChat);
@@ -552,6 +575,8 @@ function parseChat(e) {
                         if (e.sub || e.founder) playText(message, personality_speed, personality_pitch, false, e.from, voicename, true);
                     } else if (window.tts_founderonly) {
                         if (e.founder) playText(message, personality_speed, personality_pitch, false, e.from, voicename, true);
+                    } else if (window.tts_vieweronly) {
+                        if (!e.streamer) playText(message, personality_speed, personality_pitch, false, e.from, voicename, true);
                     } else {
                         playText(message, personality_speed, personality_pitch, false, e.from, voicename, true);
                     }
