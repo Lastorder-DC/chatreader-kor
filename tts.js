@@ -572,9 +572,9 @@ function parseChat(e) {
                 // 화이트리스트 사용시 화이트리스트에 있는 아이디 + 밴리스트에 없는 아이디 + 채팅 길이가 지정된 길이 미만
                 if (index_whitelist !== -1 && index === -1 && message.length < window.maxlength) {
                     if (window.tts_subonly) {
-                        if (e.sub || e.founder) playText(message, personality_speed, personality_pitch, false, e.from, voicename, true);
+                        if ((e.streamer && !window.tts_vieweronly) || e.sub || e.founder) playText(message, personality_speed, personality_pitch, false, e.from, voicename, true);
                     } else if (window.tts_founderonly) {
-                        if (e.founder) playText(message, personality_speed, personality_pitch, false, e.from, voicename, true);
+                        if ((e.streamer && !window.tts_vieweronly) || e.founder) playText(message, personality_speed, personality_pitch, false, e.from, voicename, true);
                     } else if (window.tts_vieweronly) {
                         if (!e.streamer) playText(message, personality_speed, personality_pitch, false, e.from, voicename, true);
                     } else {
