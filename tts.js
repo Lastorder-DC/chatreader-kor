@@ -601,6 +601,16 @@ function parseMessage(e) {
 }
 
 /**
+ * 해당 TTS 보이스를 지원하는지 체크
+ * @param {String} 언어 코드
+ * @param {Object} TTS 보이스 오브젝트
+ * @returns {Boolean} 지원여부
+ */
+function isSupportedVoice(language, voice) {
+    return voice.lang == language && !voice.localService;
+}
+
+/**
  * 실제 TTS에 요청을 보내는 함수
  * @param {String} string 읽을 문자열
  * @param {Number} speed 읽는 속도
@@ -645,22 +655,22 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
         if (voicename === "default") {
             speechSynthesis.getVoices().forEach(function (voice) {
                 if (detectedLanguage == "kor") {
-                    if (voice.lang === "ko-KR" && voice.name.indexOf("Google") !== -1) {
+                    if (isSupportedVoice("ko-KR", voice)) {
                         voiceLang = "ko-KR";
                         voiceIdx = i;
                     }
                 } else if (detectedLanguage == "jpn") {
-                    if (voice.lang === "ja-JP" && voice.name.indexOf("Google") !== -1) {
+                    if (isSupportedVoice("ja-JP", voice)) {
                         voiceLang = "ja-JP";
                         voiceIdx = i;
                     }
                 } else if (detectedLanguage == "chn") {
-                    if (voice.lang === "zh-CN" && voice.name.indexOf("Google") !== -1) {
+                    if (isSupportedVoice("zh-CN", voice)) {
                         voiceLang = "zh-CN";
                         voiceIdx = i;
                     }
                 } else {
-                    if (voice.lang === "en-US" && voice.name.indexOf("Google") !== -1) {
+                    if (isSupportedVoice("en-US", voice)) {
                         voiceIdx = i;
                     }
                 }
