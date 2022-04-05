@@ -377,6 +377,16 @@ function checkTTS() {
             document.getElementById("btn-cancel").disabled = false;
             document.getElementById("btn-cancel").innerHTML = "큐 비우기";
             document.getElementById("btn-logout").disabled = false;
+            document.getElementById("chk-use-autodetection").disabled = false;
+            updateEngineList();
+            
+            if(window.autodetect) {
+                document.getElementById("chk-use-autodetection").checked = true;
+                document.getElementById("ttsList").disabled = true;
+            } else {
+                document.getElementById("chk-use-autodetection").checked = false;
+                document.getElementById("ttsList").disabled = false;
+            }
         };
 
         utterances.push(msg);
@@ -653,30 +663,36 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
         if (typeof voicename === 'undefined') voicename = "default";
 
         if (voicename === "default") {
-            speechSynthesis.getVoices().forEach(function (voice) {
-                if (detectedLanguage == "kor") {
-                    if (isSupportedVoice("ko-KR", voice)) {
-                        voiceLang = "ko-KR";
-                        voiceIdx = i;
+            if(window.autodetect || window.engine_id == -1) {
+                speechSynthesis.getVoices().forEach(function (voice) {
+                    if (detectedLanguage == "kor") {
+                        if (isSupportedVoice("ko-KR", voice)) {
+                            voiceLang = "ko-KR";
+                            voiceIdx = i;
+                        }
+                    } else if (detectedLanguage == "jpn") {
+                        if (isSupportedVoice("ja-JP", voice)) {
+                            voiceLang = "ja-JP";
+                            voiceIdx = i;
+                        }
+                    } else if (detectedLanguage == "chn") {
+                        if (isSupportedVoice("zh-CN", voice)) {
+                            voiceLang = "zh-CN";
+                            voiceIdx = i;
+                        }
+                    } else {
+                        if (isSupportedVoice("en-US", voice)) {
+                            voiceIdx = i;
+                        }
                     }
-                } else if (detectedLanguage == "jpn") {
-                    if (isSupportedVoice("ja-JP", voice)) {
-                        voiceLang = "ja-JP";
-                        voiceIdx = i;
-                    }
-                } else if (detectedLanguage == "chn") {
-                    if (isSupportedVoice("zh-CN", voice)) {
-                        voiceLang = "zh-CN";
-                        voiceIdx = i;
-                    }
-                } else {
-                    if (isSupportedVoice("en-US", voice)) {
-                        voiceIdx = i;
-                    }
-                }
 
-                i++;
-            });
+                    i++;
+                });
+                
+                document.getElementById("ttsList").value = voiceIdx;
+            } else {
+                voiceIdx = parseInt(window.engine_id);
+            }
             
             // TTS를 위한 객체 초기화(언어, 목소리 등 정보 포함)
             const msg = new SpeechSynthesisUtterance(string);
@@ -864,4 +880,35 @@ function setLanguage(language, status) {
     }
     
     localStorage.setItem("languagelist", JSON.stringify(window.languagelist));
+}
+
+/**
+ * TTS 엔진 선택 함수
+ */
+function setTTSEngine(engine_id) {
+    window.engine_id = engine_id;
+    localStorage.setItem("engine_id", engine_id);
+}
+
+function setAutoDetect(enable) {
+    if(enable) {
+        document.getElementById("ttsList").disabled = true;
+        localStorage.setItem('autodetect', 'true');
+        window.autodetect = true;
+    } else {
+        document.getElementById("ttsList").disabled = false;
+        localStorage.setItem('autodetect', 'true');
+        window.autodetect = true;
+    }
+}
+
+function updateEngineList() {
+    const voiceList = speechSynthesis.getVoices();
+    let idx = 0;
+    
+    $('#ttsList').empty();
+    voiceList.forEach(function (voice) {
+        const option = $('<option value="' + idx++ + '">' + voice.name + '</option>');
+        $('#ttsList').append(option);
+    });
 }
