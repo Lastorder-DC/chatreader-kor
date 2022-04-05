@@ -30,7 +30,7 @@
             <input type="checkbox" id="chk-enable-jpn" onclick="setLanguage('jpn', this.checked)" /> 일본어(우선순위 : <span id="ord-jpn">비활성화</span>)
             <input type="checkbox" id="chk-enable-chn" onclick="setLanguage('chn', this.checked)" /> 중국어(우선순위 : <span id="ord-chn">비활성화</span>)<br />
             <h5>사용할 TTS 엔진</h5>
-            <input type="checkbox" id="chk-use-autodetection" onclick="setAutoDetect(this.checked);" /> 자동 감지<br />
+            <input type="checkbox" id="chk-use-autodetection" disabled="disabled" onclick="setAutoDetect(this.checked);" /> 자동 감지<br />
             한국어 : <select id="ttsList-kor" disabled="disabled" onchange="setTTSEngine('kor', this.value)">
                 <option value="loading">(TTS 목록 로딩중)</option>
             </select>
@@ -180,7 +180,7 @@
         window.autodetect = localStorage.getItem("autodetect") !== "false";
         
         // TTS 엔진
-        window.engine_ids = localStorage.getItem("engine_ids") !== null ? JSON.parse(localStorage.getItem("engine_ids")) : [kor: -1, jpn: -1, chn: -1, eng: -1];
+        window.engine_ids = localStorage.getItem("engine_ids") !== null ? JSON.parse(localStorage.getItem("engine_ids")) : {kor: -1, jpn: -1, chn: -1, eng: -1};
 
         // 기본 보이스
         window.def_voice = localStorage.getItem("def_voice") !== null ? localStorage.getItem("def_voice") : "default";
