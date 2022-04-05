@@ -180,7 +180,7 @@
         window.autodetect = localStorage.getItem("autodetect") !== "false";
         
         // TTS 엔진
-        window.engine_id = localStorage.getItem("engine_id") !== null ? parseInt(localStorage.getItem("engine_id")) : -1;
+        window.engine_ids = localStorage.getItem("engine_ids") !== null ? JSON.parse(localStorage.getItem("engine_ids")) : [kor: -1, jpn: -1, chn: -1, eng: -1];
 
         // 기본 보이스
         window.def_voice = localStorage.getItem("def_voice") !== null ? localStorage.getItem("def_voice") : "default";
