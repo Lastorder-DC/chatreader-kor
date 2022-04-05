@@ -909,7 +909,7 @@ function setAutoDetect(enable) {
         document.getElementById("ttsList-jpn").disabled = false;
         document.getElementById("ttsList-chn").disabled = false;
         document.getElementById("ttsList-eng").disabled = false;
-        localStorage.setItem('autodetect', 'true');
+        localStorage.setItem('autodetect', 'false');
         window.autodetect = false;
     }
 }
@@ -928,4 +928,8 @@ function updateEngineList() {
         $('#ttsList-chn').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
         $('#ttsList-eng').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
     });
+    
+    for(key in window.engine_ids) {
+        if(window.engine_ids[key] != -1) document.getElementById("ttsList-" + key).value = window.engine_ids[key];
+    }
 }
