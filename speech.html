@@ -50,15 +50,15 @@
         </form>
     </div>
     <script>
-        // 트위치 개발자 사이트에서 앱 등록으로 client id를 발급받으실수 있습니다.
-        window.oauth_client_id = "bz5whp3i3ihi98e6e1jx3jkxnksyk1";
-
-        // 인증후 돌아올 페이지(현재 페이지 주소)를 입력합니다.
-        window.oauth_redirect_uri = "https://lastorder.xyz/chatreader-kor/speech.html";
+        // 저장소 포크후 개인적으로 사용시 아래 <custom-domain-here> 부분과 <custom-client-id-here> 부분을 변경하시면 됩니다. 트위치 개발자 사이트에서 앱 등록으로 client id를 발급받으실수 있습니다.
+        const client_id_list = {"chatreader-kor.vercel.app":"1pzur9zyr3z0l1829syennm09fl9yi", "lastorder.xyz":"bz5whp3i3ihi98e6e1jx3jkxnksyk1", "<custom-domain-here>":"<custom-client-id-here>"};
         
         // ==================================
         // !! 이 아래로는 수정하지 마세요! !!
         // ==================================
+        window.oauth_client_id = typeof client_id_list[location.hostname] === 'undefined' ? "" : client_id_list[location.hostname];
+        window.oauth_redirect_uri = location.origin + location.pathname;
+        
         const url_string = window.location.href;
         const url = new URL(url_string);
         
@@ -72,6 +72,15 @@
 
         // 주소뒤 ?channel=(채널아이디) 로 지정
         window.channelname = getParams("channel");
+        
+        // 클라이언트 ID가 비어 있다면 쿼리스트링을 통해 받아오는것을 시도한다(포크후 소스코드 수정 없이도 이용 가능하도록)
+        if(!window.oauth_client_id) window.oauth_client_id = getParams("channel");
+        
+        // 그래도 클라이언트 아이디가 비어 있다면 오류이다
+        if(!window.oauth_client_id) {
+            alert("Please set twitch client id before use!");
+            location.href = location.origin + "/error.html";
+        }
         
         // 채널명 없으면 비워둠
         if (window.channelname === null) window.channelname = "";
