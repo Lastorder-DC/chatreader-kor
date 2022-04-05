@@ -30,7 +30,7 @@
             <input type="checkbox" id="chk-enable-jpn" onclick="setLanguage('jpn', this.checked)" /> 일본어(우선순위 : <span id="ord-jpn">비활성화</span>)
             <input type="checkbox" id="chk-enable-chn" onclick="setLanguage('chn', this.checked)" /> 중국어(우선순위 : <span id="ord-chn">비활성화</span>)<br />
             <h5>사용할 TTS 엔진</h5>
-            <input type="checkbox" id="chk-use-autodetection" onclick="localStorage.setItem('autodetect', this.checked ? 'true' : 'false');window.autodetect = !this.checked;" /> 자동 감지<br />
+            <input type="checkbox" id="chk-use-autodetection" onclick="setAutoDetect(this.checked);" /> 자동 감지<br />
             <select id="ttsList" disabled="disabled" onchange="setTTSEngine(this.value)">
                 <option value="loading">(TTS 목록 로딩중)</option>
             </select><br />
@@ -166,6 +166,12 @@
 
         // 보이스 개인화 설정
         window.uniq_voice = localStorage.getItem("uniq_voice") !== "false";
+        
+        // TTS 자동감지 설정
+        window.autodetect = localStorage.getItem("autodetect") !== "false";
+        
+        // TTS 엔진
+        window.engine_id = localStorage.getItem("engine_id") !== null ? parseInt(localStorage.getItem("engine_id")) : -1;
 
         // 기본 보이스
         window.def_voice = localStorage.getItem("def_voice") !== null ? localStorage.getItem("def_voice") : "default";
@@ -204,7 +210,7 @@
                     location.href = url.origin + url.pathname + "?channel=" + window.login;
                 } else {
                     client = new tmi.Client({
-                    options: { debug: true, messagesLogLevel: "info", clientId: window.oauth_client_id },
+                    options: { debug: true, messagesLogLevel: "info", clientId: window.oauth_client_id, skipUpdatingEmotesets:true },
                     connection: {
                         reconnect: true,
                         secure: true
