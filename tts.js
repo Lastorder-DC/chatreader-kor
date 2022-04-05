@@ -695,7 +695,7 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
                     i++;
                 });
                 
-                document.getElementById("ttsList-" + ).value = voiceIdx;
+                document.getElementById("ttsList-" + detectedLanguage).value = voiceIdx;
             } else {
                 voiceIdx = parseInt(window.engine_ids[detectedLanguage]);
             }
