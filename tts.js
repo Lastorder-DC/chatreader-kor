@@ -382,10 +382,16 @@ function checkTTS() {
             
             if(window.autodetect) {
                 document.getElementById("chk-use-autodetection").checked = true;
-                document.getElementById("ttsList").disabled = true;
+                document.getElementById("ttsList-kor").disabled = true;
+                document.getElementById("ttsList-jpn").disabled = true;
+                document.getElementById("ttsList-chn").disabled = true;
+                document.getElementById("ttsList-eng").disabled = true;
             } else {
                 document.getElementById("chk-use-autodetection").checked = false;
-                document.getElementById("ttsList").disabled = false;
+                document.getElementById("ttsList-kor").disabled = false;
+                document.getElementById("ttsList-jpn").disabled = false;
+                document.getElementById("ttsList-chn").disabled = false;
+                document.getElementById("ttsList-eng").disabled = false;
             }
         };
 
@@ -641,7 +647,7 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
         let i = 0;
         let voiceIdx = -1;
         let voiceLang = "en-US";
-        let detectedLanguage = "none";
+        let detectedLanguage = "eng";
         const check = [];
         check['kor'] = /[ㄱ-ㅎㅏ-ㅣ가-힣]/;
         check['jpn'] = /[\u3040-\u30ff\u31f0-\u31ff]/;
@@ -663,7 +669,7 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
         if (typeof voicename === 'undefined') voicename = "default";
 
         if (voicename === "default") {
-            if(window.autodetect || window.engine_id == -1) {
+            if(window.autodetect || window.engine_ids[detectedLanguage] == -1) {
                 speechSynthesis.getVoices().forEach(function (voice) {
                     if (detectedLanguage == "kor") {
                         if (isSupportedVoice("ko-KR", voice)) {
@@ -689,9 +695,9 @@ function playText(string, speed, pitch, ignoreKor, nickname, voicename, banable 
                     i++;
                 });
                 
-                document.getElementById("ttsList").value = voiceIdx;
+                document.getElementById("ttsList-" + ).value = voiceIdx;
             } else {
-                voiceIdx = parseInt(window.engine_id);
+                voiceIdx = parseInt(window.engine_ids[detectedLanguage]);
             }
             
             // TTS를 위한 객체 초기화(언어, 목소리 등 정보 포함)
@@ -885,18 +891,24 @@ function setLanguage(language, status) {
 /**
  * TTS 엔진 선택 함수
  */
-function setTTSEngine(engine_id) {
-    window.engine_id = engine_id;
-    localStorage.setItem("engine_id", engine_id);
+function setTTSEngine(language, engine_id) {
+    window.engine_ids[language] = engine_id;
+    localStorage.setItem("engine_ids", JSON.stringify(window.engine_ids));
 }
 
 function setAutoDetect(enable) {
     if(enable) {
-        document.getElementById("ttsList").disabled = true;
+        document.getElementById("ttsList-kor").disabled = true;
+        document.getElementById("ttsList-jpn").disabled = true;
+        document.getElementById("ttsList-chn").disabled = true;
+        document.getElementById("ttsList-eng").disabled = true;
         localStorage.setItem('autodetect', 'true');
         window.autodetect = true;
     } else {
-        document.getElementById("ttsList").disabled = false;
+        document.getElementById("ttsList-kor").disabled = false;
+        document.getElementById("ttsList-jpn").disabled = false;
+        document.getElementById("ttsList-chn").disabled = false;
+        document.getElementById("ttsList-eng").disabled = false;
         localStorage.setItem('autodetect', 'true');
         window.autodetect = false;
     }
@@ -906,9 +918,15 @@ function updateEngineList() {
     const voiceList = speechSynthesis.getVoices();
     let idx = 0;
     
-    $('#ttsList').empty();
+    $('#ttsList-kor').empty();
+    $('#ttsList-jpn').empty();
+    $('#ttsList-chn').empty();
+    $('#ttsList-eng').empty();
     voiceList.forEach(function (voice) {
         const option = $('<option value="' + idx++ + '">' + voice.name + '</option>');
-        $('#ttsList').append(option);
+        $('#ttsList-kor').append(option);
+        $('#ttsList-jpn').append(option);
+        $('#ttsList-chn').append(option);
+        $('#ttsList-eng').append(option);
     });
 }
