@@ -923,10 +923,9 @@ function updateEngineList() {
     $('#ttsList-chn').empty();
     $('#ttsList-eng').empty();
     voiceList.forEach(function (voice) {
-        const option = $('<option value="' + idx++ + '">' + voice.name + '</option>');
-        $('#ttsList-kor').append(option);
-        $('#ttsList-jpn').append(option);
-        $('#ttsList-chn').append(option);
-        $('#ttsList-eng').append(option);
+        $('#ttsList-kor').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
+        $('#ttsList-jpn').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
+        $('#ttsList-chn').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
+        $('#ttsList-eng').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
     });
 }
