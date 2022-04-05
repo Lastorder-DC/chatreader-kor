@@ -25,10 +25,10 @@
             <button type="button" class="btn btn-warning" onclick="localStorage.setItem('oauth','');location.reload();" id="btn-logout">로그아웃</button>
             <button type="button" class="btn btn-success" onclick="window.change_channel();" id="btn-channel">채널 변경</button><br />
             <input type="checkbox" id="chk-autoscroll" onclick="localStorage.setItem('autoscroll', this.checked ? 'true' : 'false');window.stopScroll = !this.checked;if(!window.stopScroll) scrollBottom();" /> 자동 스크롤 켜기<br /><br />
-            <h5>활성화된 언어</h5>
+            <h5>언어 감지 우선순위</h5>
             <input type="checkbox" id="chk-enable-kor" onclick="setLanguage('kor', this.checked)" /> 한국어(우선순위 : <span id="ord-kor">비활성화</span>)
             <input type="checkbox" id="chk-enable-jpn" onclick="setLanguage('jpn', this.checked)" /> 일본어(우선순위 : <span id="ord-jpn">비활성화</span>)
-            <input type="checkbox" id="chk-enable-chn" onclick="setLanguage('chn', this.checked)" /> 중국어(우선순위 : <span id="ord-chn">비활성화</span>)<br />
+            <input type="checkbox" id="chk-enable-chn" onclick="setLanguage('chn', this.checked)" /> 중국어(우선순위 : <span id="ord-chn">비활성화</span>)<br /><br />
             <h5>사용할 TTS 엔진</h5>
             <input type="checkbox" id="chk-use-autodetection" disabled="disabled" onclick="setAutoDetect(this.checked);" /> 자동 감지<br />
             한국어 : <select id="ttsList-kor" disabled="disabled" onchange="setTTSEngine('kor', this.value)">
