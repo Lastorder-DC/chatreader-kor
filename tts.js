@@ -923,10 +923,10 @@ function updateEngineList() {
     $('#ttsList-chn').empty();
     $('#ttsList-eng').empty();
     voiceList.forEach(function (voice) {
-        $('#ttsList-kor').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
-        $('#ttsList-jpn').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
-        $('#ttsList-chn').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
-        $('#ttsList-eng').append($('<option value="' + idx++ + '">' + voice.name + '</option>'));
+        $('#ttsList-kor').append($('<option value="' + idx++ + '">' + voice.name + ' - ' + voice.lang + '</option>'));
+        $('#ttsList-jpn').append($('<option value="' + idx++ + '">' + voice.name + ' - ' + voice.lang + '</option>'));
+        $('#ttsList-chn').append($('<option value="' + idx++ + '">' + voice.name + ' - ' + voice.lang + '</option>'));
+        $('#ttsList-eng').append($('<option value="' + idx++ + '">' + voice.name + ' - ' + voice.lang + '</option>'));
     });
     
     for(key in window.engine_ids) {
