@@ -29,6 +29,11 @@
             <input type="checkbox" id="chk-enable-kor" onclick="setLanguage('kor', this.checked)" /> 한국어(우선순위 : <span id="ord-kor">비활성화</span>)
             <input type="checkbox" id="chk-enable-jpn" onclick="setLanguage('jpn', this.checked)" /> 일본어(우선순위 : <span id="ord-jpn">비활성화</span>)
             <input type="checkbox" id="chk-enable-chn" onclick="setLanguage('chn', this.checked)" /> 중국어(우선순위 : <span id="ord-chn">비활성화</span>)<br />
+            <h5>사용할 TTS 엔진</h5>
+            <input type="checkbox" id="chk-use-autodetection" onclick="localStorage.setItem('autodetect', this.checked ? 'true' : 'false');window.autodetect = !this.checked;" /> 자동 감지<br />
+            <select id="ttsList" disabled="disabled" onchange="setTTSEngine(this.value)">
+                <option value="loading">(TTS 목록 로딩중)</option>
+            </select><br />
             <div id="last_read" style="width:100%; height: 200px; overflow-y: scroll;"></div>
         </div>
         <form style="margin:10px">
