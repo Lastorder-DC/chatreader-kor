@@ -898,7 +898,7 @@ function setAutoDetect(enable) {
     } else {
         document.getElementById("ttsList").disabled = false;
         localStorage.setItem('autodetect', 'true');
-        window.autodetect = true;
+        window.autodetect = false;
     }
 }
 
