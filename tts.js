@@ -346,11 +346,11 @@ function addKeyword(keyword, callback) {
 /**
  * TTS 체크하여 사용 가능 여부 설정
  */
-function checkTTS() {
+function checkTTS(testString) {
     if ('speechSynthesis' in window) {
         window.utterances = [];
 
-        const msg = new SpeechSynthesisUtterance(window.channelname + " 채널에 연결되었습니다.");
+        const msg = new SpeechSynthesisUtterance(testString);
         msg.rate = 1.3;
         speechSynthesis.cancel();
 
