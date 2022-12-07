@@ -12,7 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.0/js/bootstrap.bundle.min.js" integrity="sha512-wV7Yj1alIZDqZFCUQJy85VN+qvEIly93fIQAN7iqDFCPEucLCeNFz4r35FCo9s6WrpdDQPi80xbljXB8Bjtvcg==" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js" integrity="sha512-RdSPYh1WA6BF0RhpisYJVYkOyTzK4HwofJ3Q7ivt/jkpW6Vc8AurL1R+4AUcvn9IwEKAPm/fk7qFZW3OuiUDeg==" crossorigin="anonymous"></script>
     <script src="./notifications.js"></script>
-    <script src="./tts.js"></script>
+    <script src="./tts.js?v=20221207"></script>
 </head>
 <body>
     <div id="divClick" style="display: block">활성화를 위해 마우스 클릭이 필요합니다.</div>
@@ -68,6 +68,9 @@
         
         // 기본 보이스
         window.def_voice = localStorage.getItem("parrot_def_voice") !== null ? localStorage.getItem("parrot_def_voice") : "default";
+        
+        // 언어 순서 설정
+        window.languagelist = localStorage.getItem("languagelist") !== null ? JSON.parse(localStorage.getItem("languagelist")) : ["kor","jpn"];
 
         speechSynthesis.cancel();
 
@@ -87,6 +90,7 @@
         
         $(document).on('click', function() {
             if(window.isclicked) return;
+            checkTTS("음성인식 준비 완료.");
             window.isclicked = true;
             document.getElementById("divClick").style.display = "none";
             document.getElementById("divContent").style.display = "block";
