@@ -82,8 +82,13 @@ function displayResultFromUI(result, msg, usecoloredchat = true) {
  * @param {Boolean} usecoloredchat 색챗 사용여부
  */
 function displayResultFromChat(result, msg, usecoloredchat = true) {
+    if (window.platform === 'chzzk' || !client || typeof client.say !== 'function') {
+        displayResultFromUI(result, msg, usecoloredchat);
+        return;
+    }
+
     const header = usecoloredchat ? "/me [TTSBOT] " : "[TTSBOT] ";
-    
+
     client.say(window.channelname, header + msg);
 }
 
