@@ -568,7 +568,8 @@ function parseChat(e) {
         if (message.charCodeAt(message.length - 1) === 1) message = message.substr(0, message.length - 1);
 
         // 트위치 이모티콘은 읽지 않음
-        message = replaceTwitchEmoticon(message, e.emotes);
+        if(!!e.emotes) message = replaceTwitchEmoticon(message, e.emotes);
+        
         if (message !== "") {
             // 모더레이터/스트리머는 설정 무관 최대 120글자 읽기 가능
             if ((e.mod && index === -1) || (!window.tts_vieweronly && (e.streamer || e.badges.indexOf("broadcaster/1") !== -1))) {
