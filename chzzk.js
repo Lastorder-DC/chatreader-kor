@@ -64,34 +64,36 @@
         }
 
         async refreshMetadata() {
-            const liveDetailUrl = `https://api.chzzk.naver.com/service/v2/channels/${this.channelId}/live-detail`;
-            const liveResponse = await fetch(liveDetailUrl, { credentials: 'omit' });
-            if (!liveResponse.ok) {
-                throw new Error('라이브 정보를 불러오지 못했습니다.');
+            const channelUrl = `https://api.chatassistx.cc/?command=getChannel&cid=${this.channelId}`;
+            const channelResponse = await fetch(channelUrl, { credentials: 'omit' });
+            if (!channelResponse.ok) {
+                throw new Error('채널 정보를 불러오지 못했습니다.');
             }
 
-            const liveJson = await liveResponse.json();
-            const content = liveJson?.content || {};
+            const channelJson = await channelResponse.json();
+            const channelContent = channelJson?.content || {};
 
-            if (!content.chatChannelId) {
+            if (!channelContent.openLive) {
                 throw new Error('현재 라이브가 진행 중이 아니거나 채팅을 사용할 수 없습니다.');
             }
 
-            this.chatChannelId = content.chatChannelId;
-            this.channelName = content?.channel?.channelName || '';
+            this.channelName = channelContent?.channelName || channelContent?.channel?.channelName || '';
 
-            const tokenUrl = `https://comm-api.game.naver.com/nng_main/v1/chats/access-token?channelId=${this.chatChannelId}&chatType=STREAMING`;
-            const tokenResponse = await fetch(tokenUrl, { credentials: 'omit' });
-            if (!tokenResponse.ok) {
-                throw new Error('채팅 토큰을 가져오지 못했습니다.');
+            const liveStatusUrl = `https://api.chatassistx.cc/?command=getLiveStatus&cid=${this.channelId}`;
+            const liveStatusResponse = await fetch(liveStatusUrl, { credentials: 'omit' });
+            if (!liveStatusResponse.ok) {
+                throw new Error('채팅 정보를 가져오지 못했습니다.');
             }
 
-            const tokenJson = await tokenResponse.json();
-            this.accessToken = tokenJson?.content?.accessToken || null;
-            this.extraToken = tokenJson?.content?.extraToken || null;
+            const liveStatusJson = await liveStatusResponse.json();
+            const liveContent = liveStatusJson?.content || {};
 
-            if (!this.accessToken) {
-                throw new Error('유효한 채팅 토큰이 없습니다.');
+            this.chatChannelId = liveContent.chatChannelId || null;
+            this.accessToken = liveStatusJson['access-token'] || liveContent.accessToken || null;
+            this.extraToken = liveStatusJson['extra-token'] || liveContent.extraToken || null;
+
+            if (!this.chatChannelId || !this.accessToken) {
+                throw new Error('유효한 채팅 정보를 가져오지 못했습니다.');
             }
         }
 
