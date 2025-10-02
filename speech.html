@@ -14,6 +14,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.5.2/bootbox.min.js" integrity="sha512-RdSPYh1WA6BF0RhpisYJVYkOyTzK4HwofJ3Q7ivt/jkpW6Vc8AurL1R+4AUcvn9IwEKAPm/fk7qFZW3OuiUDeg==" crossorigin="anonymous"></script>
     <script src="./tmi.min.js?v=20220302-renewal2"></script>
     <script src="./notifications.js?v=20210911"></script>
+    <script src="./chzzk.js?v=20250930"></script>
     <script src="./tts.js?v=20221207"></script>
 </head>
 <body>
@@ -52,12 +53,19 @@
     <script>
         // 저장소 포크후 개인적으로 사용시 아래 <custom-domain-here> 부분과 <custom-client-id-here> 부분을 변경하시면 됩니다. 트위치 개발자 사이트에서 앱 등록으로 client id를 발급받으실수 있습니다.
         const client_id_list = {"chatreader-kor.vercel.app":"1pzur9zyr3z0l1829syennm09fl9yi", "lastorder.xyz":"bz5whp3i3ihi98e6e1jx3jkxnksyk1", "<custom-domain-here>":"<custom-client-id-here>"};
-        
+
         // ==================================
         // !! 이 아래로는 수정하지 마세요! !!
         // ==================================
-        window.oauth_client_id = typeof client_id_list[location.hostname] === 'undefined' ? "" : client_id_list[location.hostname];
-        window.oauth_redirect_uri = location.origin + location.pathname;
+        window.platform = (getParams("platform") || "twitch").toLowerCase();
+
+        if (window.platform !== "chzzk") {
+            window.oauth_client_id = typeof client_id_list[location.hostname] === 'undefined' ? "" : client_id_list[location.hostname];
+            window.oauth_redirect_uri = location.origin + location.pathname;
+        } else {
+            window.oauth_client_id = "";
+            window.oauth_redirect_uri = "";
+        }
         
         const url_string = window.location.href;
         const url = new URL(url_string);
@@ -73,13 +81,15 @@
         // 주소뒤 ?channel=(채널아이디) 로 지정
         window.channelname = getParams("channel");
         
-        // 클라이언트 ID가 비어 있다면 쿼리스트링을 통해 받아오는것을 시도한다(포크후 소스코드 수정 없이도 이용 가능하도록)
-        if(!window.oauth_client_id) window.oauth_client_id = getParams("channel");
-        
-        // 그래도 클라이언트 아이디가 비어 있다면 오류이다
-        if(!window.oauth_client_id) {
-            alert("Please set twitch client id before use!");
-            location.href = location.origin + "/error.html";
+        if (window.platform !== "chzzk") {
+            // 클라이언트 ID가 비어 있다면 쿼리스트링을 통해 받아오는것을 시도한다(포크후 소스코드 수정 없이도 이용 가능하도록)
+            if(!window.oauth_client_id) window.oauth_client_id = getParams("channel");
+
+            // 그래도 클라이언트 아이디가 비어 있다면 오류이다
+            if(!window.oauth_client_id) {
+                alert("Please set twitch client id before use!");
+                location.href = location.origin + "/error.html";
+            }
         }
         
         // 채널명 없으면 비워둠
@@ -188,13 +198,23 @@
         window.speechQueue = [];
         
         // tokens before 21/10/7 00:00(GMT+9) are invalid due to twitch hacking
-        if (window.oauth !== "" && window.login !== "" && window.last_login_date > 1633532400) {
+        if (window.platform === "chzzk") {
+            window.client = { say: function() {} };
+
             $(document).on('click', function() {
                 if(window.isclicked) return;
                 window.isclicked = true;
                 document.getElementById("divClick").style.display = "none";
                 document.getElementById("divContent").style.display = "block";
-                
+                startChzzk();
+            });
+        } else if (window.oauth !== "" && window.login !== "" && window.last_login_date > 1633532400) {
+            $(document).on('click', function() {
+                if(window.isclicked) return;
+                window.isclicked = true;
+                document.getElementById("divClick").style.display = "none";
+                document.getElementById("divContent").style.display = "block";
+
                 if (window.channelname === "") {
                     location.href = url.origin + url.pathname + "?channel=" + window.login;
                 } else {
@@ -209,11 +229,11 @@
                         password: window.oauth
                     },
                     channels: [ window.channelname ]});
-                    
+
                     client.on("connected", (address, port) => {
                         checkTTS(window.channelname + " 채널에 연결되었습니다.");
                     });
-                    
+
                     client.on("message", function(channel, userstate, message, self) {
                         // 봇 자신의 메세지 혹은 채팅이 아닌 메세지는 무시
                         if (self || userstate["message-type"] !== "chat") return;
@@ -234,7 +254,7 @@
 
                         parseMessage(msg);
                     });
-                    
+
                     client.connect().catch(console.error);
                 }
             });
@@ -297,6 +317,127 @@
                         state +
                         "\">트위치 아이디로 로그인</a>");
             }
+        }
+
+        function startChzzk() {
+            if (!window.channelname) {
+                bootbox.alert("치지직 채널 ID가 필요합니다. 채널 변경 버튼으로 ID를 입력해주세요.");
+                return;
+            }
+
+            document.getElementById("btn-cancel").innerHTML = "초기화중";
+            document.getElementById("btn-cancel").disabled = true;
+
+            if (window.chzzkClient) {
+                window.chzzkClient.stop();
+            }
+
+            window.chzzkClient = new ChzzkChatClient(window.channelname, {
+                connect: function(info) {
+                    const channelTitle = info?.channelName || window.channelname;
+                    checkTTS(channelTitle + " 채널에 연결되었습니다.");
+                },
+                disconnect: function() {
+                    window.error({
+                        title: '연결 종료',
+                        message: '치지직 채팅 연결이 종료되었습니다. 다시 연결을 시도합니다.'
+                    });
+                },
+                chat: function(payload) {
+                    handleChzzkChat(payload);
+                },
+                donation: function(payload) {
+                    handleChzzkDonation(payload);
+                },
+                subscription: function(payload) {
+                    handleChzzkSubscription(payload);
+                },
+                notice: function(payload) {
+                    if (!payload || !payload.message) return;
+                    const nickname = payload.profile?.nickname || "SYSTEM";
+                    document.getElementById("last_read").innerHTML += "<b>[공지] " + nickname + "</b>:" + payload.message + "<br />\n";
+                },
+                systemMessage: function(payload) {
+                    if (!payload || !payload.message) return;
+                    document.getElementById("last_read").innerHTML += "<b>[시스템]</b>" + payload.message + "<br />\n";
+                },
+                error: function(err) {
+                    window.error({
+                        title: '치지직 오류',
+                        message: err.message || '치지직 채팅 정보를 불러오지 못했습니다.'
+                    });
+                }
+            });
+
+            window.chzzkClient.start().catch(function(err) {
+                window.error({
+                    title: '치지직 오류',
+                    message: err.message || '치지직 채팅 연결을 시작할 수 없습니다.'
+                });
+            });
+        }
+
+        function formatChzzkBadges(profile) {
+            const badges = [];
+            if (!profile) return badges;
+
+            if (profile.userRoleCode === 'streamer') badges.push('broadcaster/1');
+            if (profile.userRoleCode === 'streaming_chat_manager' || profile.userRoleCode === 'streaming_channel_manager' || profile.userRoleCode === 'manager') badges.push('moderator/1');
+            if (profile.streamingProperty && profile.streamingProperty.subscription) badges.push('subscriber/1');
+            if (profile.verifiedMark) badges.push('verified/1');
+            return badges;
+        }
+
+        function handleChzzkChat(payload) {
+            if (!payload || payload.hidden || !payload.message) return;
+            const profile = payload.profile || {};
+            const nickname = profile.nickname || "익명";
+            const badges = formatChzzkBadges(profile);
+            const msg = {
+                from: nickname,
+                text: payload.message,
+                color: profile.streamingProperty?.nicknameColor?.colorCode || "",
+                badges: badges.join(','),
+                streamer: badges.indexOf('broadcaster/1') !== -1,
+                mod: badges.indexOf('moderator/1') !== -1,
+                sub: badges.indexOf('subscriber/1') !== -1,
+                founder: false,
+                turbo: false,
+                room_id: window.chzzkClient?.chatChannelId || "",
+                user_id: profile.userIdHash || "",
+                action: false,
+                emotes: null
+            };
+
+            parseMessage(msg);
+        }
+
+        function handleChzzkDonation(payload) {
+            if (!payload) return;
+            const profile = payload.profile || payload.extras?.params?.registerChatProfile || {};
+            const nickname = profile?.nickname || "익명의 후원자";
+            const amount = payload.extras?.payAmount;
+            const donationText = payload.message || "";
+            const combined = amount ? `${nickname}님이 ${amount}원을 후원했습니다. ${donationText}` : `${nickname}님의 후원 ${donationText}`;
+            handleChzzkChat({
+                profile,
+                message: combined,
+                hidden: payload.hidden,
+                extras: payload.extras
+            });
+        }
+
+        function handleChzzkSubscription(payload) {
+            if (!payload) return;
+            const profile = payload.profile || {};
+            const nickname = profile.nickname || "시청자";
+            const month = payload.extras?.month ? `${payload.extras.month}개월` : "";
+            const subText = `${nickname}님이 ${month ? month + ' ' : ''}구독을 갱신했습니다.`;
+            handleChzzkChat({
+                profile,
+                message: subText,
+                hidden: payload.hidden
+            });
         }
     </script>
 </body>
