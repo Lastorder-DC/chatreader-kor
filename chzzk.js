@@ -73,10 +73,6 @@
             const channelJson = await channelResponse.json();
             const channelContent = channelJson?.content || {};
 
-            if (!channelContent.openLive) {
-                throw new Error('현재 라이브가 진행 중이 아니거나 채팅을 사용할 수 없습니다.');
-            }
-
             this.channelName = channelContent?.channelName || channelContent?.channel?.channelName || '';
 
             const liveStatusUrl = `https://api.chatassistx.cc/?command=getLiveStatus&cid=${this.channelId}`;
